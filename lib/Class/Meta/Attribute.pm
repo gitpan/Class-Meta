@@ -1,6 +1,6 @@
 package Class::Meta::Attribute;
 
-# $Id: Attribute.pm,v 1.53 2004/06/28 23:21:35 david Exp $
+# $Id: Attribute.pm,v 1.56 2004/08/27 01:53:21 david Exp $
 
 =head1 NAME
 
@@ -45,7 +45,7 @@ use strict;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.36";
+our $VERSION = "0.40";
 
 ##############################################################################
 # Constructors                                                               #
@@ -66,32 +66,33 @@ object, instead.
 
 sub new {
     my $pkg = shift;
-    my $spec = shift;
+    my $class = shift;
 
     # Check to make sure that only Class::Meta or a subclass is constructing a
     # Class::Meta::Attribute object.
     my $caller = caller;
-    Class::Meta->handle_error("Package '$caller' cannot create "
-                              . __PACKAGE__ . " objects")
-      unless UNIVERSAL::isa($caller, 'Class::Meta');
+    Class::Meta->handle_error("Package '$caller' cannot create $pkg "
+                              . "objects")
+      unless UNIVERSAL::isa($caller, 'Class::Meta')
+        || UNIVERSAL::isa($caller, __PACKAGE__);
 
     # Make sure we can get all the arguments.
-    $spec->{class}->handle_error("Odd number of parameters in call to "
-                                 . "new() when named parameters were "
-                                 . "expected") if @_ % 2;
+    $class->handle_error("Odd number of parameters in call to new() when "
+                         . "named parameters were expected")
+      if @_ % 2;
     my %p = @_;
 
     # Validate the name.
-    $spec->{class}->handle_error("Parameter 'name' is required in call "
-                                 . "to new()") unless $p{name};
+    $class->handle_error("Parameter 'name' is required in call to new()")
+      unless $p{name};
     # Is this too paranoid?
-    $spec->{class}->handle_error("Attribute '$p{name}' is not a valid "
-                                 . "attribute name -- only alphanumeric "
-                                 . "and '_' characters allowed")
+    $class->handle_error("Attribute '$p{name}' is not a valid attribute "
+                         . "name -- only alphanumeric and '_' characters "
+                         . "allowed")
       if $p{name} =~ /\W/;
 
     # Grab the package name.
-    $p{package} = $spec->{package};
+    $p{package} = $class->{package};
 
     # Set the required and once attributes.
     for (qw(required once)) {
@@ -99,14 +100,13 @@ sub new {
     }
 
     # Make sure the name hasn't already been used for another attribute
-    $spec->{class}->handle_error("Attribute '$p{name}' already exists ",
-                                 "in class '",
-                                 $spec->{attrs}{$p{name}}{package}, "'")
-      if ! delete $p{override} && exists $spec->{attrs}{$p{name}};
+    $class->handle_error("Attribute '$p{name}' already exists in class '"
+                         . $class->{attrs}{$p{name}}{package} . "'")
+      if ! delete $p{override} && exists $class->{attrs}{$p{name}};
 
     # Check the view.
     if (exists $p{view}) {
-        $spec->{class}->handle_error("Not a valid view parameter: "
+        $class->handle_error("Not a valid view parameter: "
                                      . "'$p{view}'")
           unless $p{view} == Class::Meta::PUBLIC
           or     $p{view} == Class::Meta::PROTECTED
@@ -118,7 +118,7 @@ sub new {
 
     # Check the authorization level.
     if (exists $p{authz}) {
-        $spec->{class}->handle_error("Not a valid authz parameter: "
+        $class->handle_error("Not a valid authz parameter: "
                                      . "'$p{authz}'")
           unless $p{authz} == Class::Meta::NONE
           or     $p{authz} == Class::Meta::READ
@@ -131,7 +131,7 @@ sub new {
 
     # Check the creation constant.
     if (exists $p{create}) {
-        $spec->{class}->handle_error("Not a valid create parameter: "
+        $class->handle_error("Not a valid create parameter: "
                                      . "'$p{create}'")
           unless $p{create} == Class::Meta::NONE
           or     $p{create} == Class::Meta::GET
@@ -144,7 +144,7 @@ sub new {
 
     # Check the context.
     if (exists $p{context}) {
-        $spec->{class}->handle_error("Not a valid context parameter: "
+        $class->handle_error("Not a valid context parameter: "
                                      . "'$p{context}'")
           unless $p{context} == Class::Meta::OBJECT
           or     $p{context} == Class::Meta::CLASS;
@@ -161,9 +161,9 @@ sub new {
     }
 
     # Create and cache the attribute object.
-    $spec->{attrs}{$p{name}} = bless \%p, ref $pkg || $pkg;
+    $class->{attrs}{$p{name}} = bless \%p, ref $pkg || $pkg;
 
-    my $def = defined $spec->{attrs}{$p{name}}->default;
+    my $def = defined $class->{attrs}{$p{name}}->default;
     if ($p{once} && $def && $p{create} >= Class::Meta::SET) {
         # No need to generate a mutator for required values that can only be
         # set once.
@@ -172,16 +172,16 @@ sub new {
 
     # Index its view.
     if ($p{view} > Class::Meta::PRIVATE) {
-        push @{$spec->{prot_attr_ord}}, $p{name};
-        push @{$spec->{attr_ord}}, $p{name}
+        push @{$class->{prot_attr_ord}}, $p{name};
+        push @{$class->{attr_ord}}, $p{name}
           if $p{view} == Class::Meta::PUBLIC;
     }
 
     # Store a reference to the class object.
-    $p{class} = $spec->{class};
+    $p{class} = $class;
 
     # Let 'em have it.
-    return $spec->{attrs}{$p{name}};
+    return $class->{attrs}{$p{name}};
 }
 
 ##############################################################################
@@ -377,10 +377,12 @@ sub set {
 
 =head3 build
 
+  $attr->build($class);
+
 This is a protected method, designed to be called only by the Class::Meta
-class or a subclass of Class::Meta. It takes a single argument, a hash of the
-class specification maintained internally by Class::Meta, and generates
-attribute accessors by calling out to the C<make_attr_get()> and
+class or a subclass of Class::Meta. It takes a single argument, the
+Class::Meta::Class object for the class in which the attribute was defined,
+and generates attribute accessors by calling out to the C<make_attr_get()> and
 C<make_attr_set()> methods of Class::Meta::Type as appropriate for the
 Class::Meta::Attribute object.
 
@@ -390,21 +392,22 @@ Class::Meta::Constructor may need to override its behavior.
 =cut
 
 sub build {
-    my ($self, $spec) = @_;
+    my ($self, $class) = @_;
 
     # Check to make sure that only Class::Meta or a subclass is building
     # attribute accessors.
     my $caller = caller;
-    $self->class->handle_error("Package '$caller' cannot call "
-                              . __PACKAGE__ . "->build")
-      unless UNIVERSAL::isa($caller, 'Class::Meta');
+    $self->class->handle_error("Package '$caller' cannot call " . ref($self)
+                               . "->build")
+      unless UNIVERSAL::isa($caller, 'Class::Meta')
+        || UNIVERSAL::isa($caller, __PACKAGE__);
 
     # Just return if this attribute doesn't need accessors created for it.
     return $self if $self->{create} == Class::Meta::NONE;
 
     # Get the data type object and assemble the validation checks.
     my $type = Class::Meta::Type->new($self->{type});
-    $type->build($spec->{package}, $self, delete $self->{create});
+    $type->build($class->{package}, $self, delete $self->{create});
 
     # Create the attribute object get code reference.
     if ($self->{authz} >= Class::Meta::READ) {
