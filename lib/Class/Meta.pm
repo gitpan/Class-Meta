@@ -1,6 +1,6 @@
 package Class::Meta;
 
-# $Id: Meta.pm 1049 2005-01-03 20:44:00Z theory $
+# $Id: Meta.pm 1379 2005-03-09 18:27:05Z theory $
 
 =head1 NAME
 
@@ -67,7 +67,7 @@ Or make use of the introspection API:
   print "\nConstructors:\n";
   for my $ctor ($class->constructors) {
       print "  o ", $ctor->name, $/;
-      $thingy = $ctor->call;
+      $thingy = $ctor->call($class->package);
   }
 
   print "\nAttributes:\n";
@@ -611,7 +611,7 @@ C<< Class::Meta->default_error_handler >>.
 ##############################################################################
 # Dependencies                                                               #
 ##############################################################################
-use 5.008;
+use 5.006001;
 use strict;
 
 ##############################################################################
@@ -655,7 +655,7 @@ use Class::Meta::Method;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.45";
+our $VERSION = "0.46";
 
 ##############################################################################
 # Private Package Globals
@@ -1005,7 +1005,9 @@ being defined.
 
     sub add_method {
         my $class = $classes{ shift->{package} };
-        $class->{method_class}->new($class, @_);
+        push @{$class->{build_meth_ord}},
+          $class->{method_class}->new($class, @_);
+        return $class->{build_meth_ord}[-1];
     }
 
 ##############################################################################
@@ -1043,17 +1045,17 @@ C<my_class()> class method, and all requisite constructors and accessors.
         my $class = $classes{ $self->{package} };
 
         # Build the attribute accessors.
-        if (my $attrs = $class->{build_attr_ord}) {
+        if (my $attrs = delete $class->{build_attr_ord}) {
             $_->build($class) for @$attrs;
         }
 
         # Build the constructors.
-        if (my $ctors = $class->{build_ctor_ord}) {
+        if (my $ctors = delete $class->{build_ctor_ord}) {
             $_->build(\%classes) for @$ctors;
         }
 
         # Build the methods.
-        if (my $meths = $class->{build_meth_ord}) {
+        if (my $meths = delete $class->{build_meth_ord}) {
             $_->build(\%classes) for @$meths;
         }
 

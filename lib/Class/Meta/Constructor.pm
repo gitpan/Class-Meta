@@ -1,6 +1,6 @@
 package Class::Meta::Constructor;
 
-# $Id: Constructor.pm 791 2004-10-28 01:29:00Z theory $
+# $Id: Constructor.pm 1083 2005-01-09 23:29:02Z theory $
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ Class::Meta::Constructor - Class::Meta class constructor introspection
   print "\nConstructors:\n";
   for my $ctor ($class->constructors) {
       print "  o ", $ctor->name, $/;
-      my $thingy = $ctor->call;
+      my $thingy = $ctor->call($class->package);
   }
 
 =head1 DESCRIPTION
@@ -39,7 +39,7 @@ use strict;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.45";
+our $VERSION = "0.46";
 
 ##############################################################################
 # Constructors                                                               #
@@ -200,11 +200,13 @@ sub class   { $_[0]->{class}   }
 
 =head3 call
 
-  my $obj = $ctor->call(@params);
+  my $obj = $ctor->call($package, @params);
 
-Executes the constructor for the class, passing the parameters to it. Note
-that it uses a C<goto> to execute the constructor, so the call to C<call()>
-itself will not appear in a call stack trace.
+Executes the constructor. Pass in the name of the class for which it is being
+executed (since, thanks to subclassing, it may be different than the class
+with which the constructor is associated). All other parameters will be passed
+to the constructor. Note that it uses a C<goto> to execute the constructor, so
+the call to C<call()> itself will not appear in a call stack trace.
 
 =cut
 

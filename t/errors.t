@@ -1,12 +1,14 @@
 #!perl -w
 
-# $Id: errors.t 789 2004-10-28 01:25:45Z theory $
+# $Id: errors.t 1379 2005-03-09 18:27:05Z theory $
 
 ##############################################################################
 # Set up the tests.
 ##############################################################################
 use strict;
-use Test::More tests => 208;
+use Test::More $] < 5.008
+  ? (skip_all => 'Older Carp lacks @CARP_NOT support')
+  : (tests => 208);
 use File::Spec;
 my $fn = File::Spec->catfile('t', 'errors.t');
 
