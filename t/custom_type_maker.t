@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: custom_type_maker.t,v 1.10 2004/01/09 00:47:00 david Exp $
+# $Id: custom_type_maker.t 682 2004-09-28 05:59:10Z theory $
 
 ##############################################################################
 # Set up the tests.

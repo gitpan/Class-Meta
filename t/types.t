@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: types.t,v 1.10 2004/01/08 18:37:52 david Exp $
+# $Id: types.t 789 2004-10-28 01:25:45Z theory $
 
 ##############################################################################
 # Set up the tests.
@@ -152,6 +152,7 @@ BEGIN {
                   default => sub { bless {}, 'Simpson' },
                   create   => Class::Meta::GETSET
               );
+
     $c->build;
 }
 

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: types_affordance.t,v 1.4 2004/01/08 18:37:52 david Exp $
+# $Id: types_affordance.t 682 2004-09-28 05:59:10Z theory $
 
 ##############################################################################
 # Set up the tests.

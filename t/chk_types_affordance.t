@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: chk_types_affordance.t,v 1.3 2004/01/09 00:47:00 david Exp $
+# $Id: chk_types_affordance.t 682 2004-09-28 05:59:10Z theory $
 
 ##############################################################################
 # Set up the tests.

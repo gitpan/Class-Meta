@@ -1,6 +1,6 @@
 #!perl -w
 
-# $Id: view_affordance.t,v 1.2 2004/01/28 02:09:04 david Exp $
+# $Id: view_affordance.t 682 2004-09-28 05:59:10Z theory $
 
 ##############################################################################
 # Set up the tests.

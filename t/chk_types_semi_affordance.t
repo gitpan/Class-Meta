@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: chk_types_semi_affordance.t,v 1.1 2004/04/18 17:48:39 david Exp $
+# $Id: chk_types_semi_affordance.t 682 2004-09-28 05:59:10Z theory $
 
 ##############################################################################
 # Set up the tests.

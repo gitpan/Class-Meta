@@ -1,6 +1,6 @@
 package Class::Meta;
 
-# $Id: Meta.pm,v 1.99 2004/09/20 06:22:38 david Exp $
+# $Id: Meta.pm 775 2004-10-24 02:56:58Z theory $
 
 =head1 NAME
 
@@ -653,7 +653,7 @@ use Class::Meta::Method;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.43";
+our $VERSION = "0.44";
 
 ##############################################################################
 # Private Package Globals
@@ -1091,8 +1091,7 @@ may not be easy.
 
 =head1 BUGS
 
-Please report all bugs via the CPAN Request Tracker at
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Class-Meta>.
+Please send bug reports to <bug-class-meta@rt.cpan.org>.
 
 =head1 AUTHOR
 
