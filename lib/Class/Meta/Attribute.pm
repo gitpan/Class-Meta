@@ -1,6 +1,6 @@
 package Class::Meta::Attribute;
 
-# $Id: Attribute.pm,v 1.47 2004/04/21 11:40:21 david Exp $
+# $Id: Attribute.pm,v 1.49 2004/06/17 00:07:33 david Exp $
 
 =head1 NAME
 
@@ -45,7 +45,7 @@ use strict;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.32";
+our $VERSION = "0.33";
 
 ##############################################################################
 # Constructors                                                               #
@@ -91,7 +91,7 @@ sub new {
     $spec->{class}->handle_error("Attribute '$p{name}' already exists ",
                                  "in class '",
                                  $spec->{attrs}{$p{name}}{package}, "'")
-      if exists $spec->{attrs}{$p{name}};
+      if ! delete $p{override} && exists $spec->{attrs}{$p{name}};
 
     # Check the view.
     if (exists $p{view}) {
@@ -402,7 +402,7 @@ __END__
 
 =head1 DISTRIBUTION INFORMATION
 
-This file was packaged with the Class-Meta-0.32 distribution.
+This file was packaged with the Class-Meta-0.33 distribution.
 
 =head1 BUGS
 

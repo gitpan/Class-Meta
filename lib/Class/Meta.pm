@@ -1,6 +1,6 @@
 package Class::Meta;
 
-# $Id: Meta.pm,v 1.81 2004/04/21 11:40:20 david Exp $
+# $Id: Meta.pm,v 1.83 2004/06/17 00:07:33 david Exp $
 
 =head1 NAME
 
@@ -638,7 +638,7 @@ use Class::Meta::Method;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.32";
+our $VERSION = "0.33";
 
 ##############################################################################
 # Private Package Globals
@@ -909,6 +909,14 @@ constants:
 The default value for the attribute, if any. This may be either a literal
 value or a code reference that will be executed to generate a default value.
 
+=item override
+
+If an attribute being added to a class has the same name as an attribute in a
+parent class, Class::Meta will normally throw an exception. However, in some
+cases you might want to override an attribute in a parent class to change its
+properties. In such a case, pass a true value to the C<override> parameter to
+override the attribute and avoid the exception.
+
 =back
 
 =cut
@@ -1049,7 +1057,7 @@ may not be easy.
 
 =head1 DISTRIBUTION INFORMATION
 
-This file was packaged with the Class-Meta-0.32 distribution.
+This file was packaged with the Class-Meta-0.33 distribution.
 
 =head1 BUGS
 
