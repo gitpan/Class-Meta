@@ -1,6 +1,6 @@
 package Class::Meta;
 
-# $Id: Meta.pm,v 1.59 2004/01/17 19:50:24 david Exp $
+# $Id: Meta.pm,v 1.62 2004/01/20 21:34:48 david Exp $
 
 =head1 NAME
 
@@ -537,7 +537,7 @@ use Class::Meta::Method;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.12";
+our $VERSION = "0.13";
 
 ##############################################################################
 # Private Package Globals
@@ -887,15 +887,11 @@ __END__
 
 Allow attributes to get a new value once and only once.
 
-=item *
-
-Add errors for calling protected and private methods where one shouldn't.
-
 =back
 
 =head1 DISTRIBUTION INFORMATION
 
-This file was packaged with the Class-Meta-0.11 distribution.
+This file was packaged with the Class-Meta-0.13 distribution.
 
 =head1 BUGS
 

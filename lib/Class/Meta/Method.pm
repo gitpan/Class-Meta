@@ -1,6 +1,6 @@
 package Class::Meta::Method;
 
-# $Id: Method.pm,v 1.23 2004/01/10 01:58:11 david Exp $
+# $Id: Method.pm,v 1.25 2004/01/20 21:34:48 david Exp $
 
 =head1 NAME
 
@@ -40,7 +40,7 @@ use strict;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.11";
+our $VERSION = "0.12";
 
 ##############################################################################
 # Private Package Globals
@@ -209,7 +209,9 @@ sub context { $_[0]->{context} }
 
   my $ret = $meth->call($obj, @args);
 
-Calls the method on the C<$obj> object, passing in any arguments.
+Calls the method on the C<$obj> object, passing in any arguments. Note that it
+uses a C<goto> to execute the constructor, so the call to C<call()> itself
+will not appear in a call stack trace.
 
 =cut
 
@@ -217,7 +219,7 @@ sub call {
     my $self = shift;
     my $code = $self->{caller}
       or $croak->("Cannot call method '", $self->name, "'");
-    $code->(@_);
+    goto &$code;
 }
 
 1;
@@ -225,7 +227,7 @@ __END__
 
 =head1 DISTRIBUTION INFORMATION
 
-This file was packaged with the Class-Meta-0.11 distribution.
+This file was packaged with the Class-Meta-0.13 distribution.
 
 =head1 BUGS
 
