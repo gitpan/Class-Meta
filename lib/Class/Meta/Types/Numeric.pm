@@ -1,6 +1,6 @@
 package Class::Meta::Types::Numeric;
 
-# $Id: Numeric.pm,v 1.5 2004/01/09 03:50:22 david Exp $
+# $Id: Numeric.pm,v 1.7 2004/01/10 01:58:11 david Exp $
 
 =head1 NAME
 
@@ -72,7 +72,7 @@ A floating point number.
 use strict;
 use Class::Meta::Type;
 use Data::Types ();
-our $VERSION = "0.10";
+our $VERSION = "0.11";
 
 my $croak = sub {
     require Carp;
@@ -143,6 +143,15 @@ sub import {
 
 1;
 __END__
+
+=head1 DISTRIBUTION INFORMATION
+
+This file was packaged with the Class-Meta-0.11 distribution.
+
+=head1 BUGS
+
+Please report all bugs via the CPAN Request Tracker at
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Class-Meta>.
 
 =head1 AUTHOR
 

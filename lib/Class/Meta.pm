@@ -1,6 +1,6 @@
 package Class::Meta;
 
-# $Id: Meta.pm,v 1.53 2004/01/09 03:50:21 david Exp $
+# $Id: Meta.pm,v 1.57 2004/01/15 02:48:43 david Exp $
 
 =head1 NAME
 
@@ -93,7 +93,7 @@ class:
 
   BEGIN {
       # Create a Class::Meta object for this class.
-      my $c = Class::Meta->new( key => 'dog' );
+      my $cm = Class::Meta->new( key => 'dog' );
 
       # Add a constructor.
       $cm->add_constructor( name   => 'new',
@@ -537,7 +537,7 @@ use Class::Meta::Method;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.10";
+our $VERSION = "0.11";
 
 ##############################################################################
 # Private Package Globals
@@ -556,7 +556,8 @@ my $croak = sub { require Carp; Carp::croak(@_) };
         my %p = @_;
 
         # Class defaults to caller. Key defaults to class.
-        $p{key} ||= $p{package} ||= caller;
+        $p{package} ||= caller;
+        $p{key} ||= $p{package};
 
         $p{class_class}       ||= 'Class::Meta::Class';
         $p{constructor_class} ||= 'Class::Meta::Constructor';
@@ -898,6 +899,15 @@ Allow attributes to get a new value once and only once.
 Add errors for calling protected and private methods where one shouldn't.
 
 =back
+
+=head1 DISTRIBUTION INFORMATION
+
+This file was packaged with the Class-Meta-0.11 distribution.
+
+=head1 BUGS
+
+Please report all bugs via the CPAN Request Tracker at
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Class-Meta>.
 
 =head1 AUTHOR
 

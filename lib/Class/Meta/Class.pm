@@ -1,6 +1,6 @@
 package Class::Meta::Class;
 
-# $Id: Class.pm,v 1.25 2004/01/09 03:50:21 david Exp $
+# $Id: Class.pm,v 1.28 2004/01/15 03:11:21 david Exp $
 
 =head1 NAME
 
@@ -56,7 +56,7 @@ use Class::Meta::Method;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.10";
+our $VERSION = "0.11";
 our @CARP_NOT = qw(Class::Meta);
 
 ##############################################################################
@@ -177,7 +177,7 @@ specified names.
     sub constructors {
         my $self = shift;
         my $spec = $specs{$self->{package}};
-        my $objs = $spec->{constructors};
+        my $objs = $spec->{ctors};
         # Explicit list requested.
         my $list = @_ ? \@_
           # List of protected interface objects.
@@ -296,6 +296,15 @@ returns all of the method objects with the specified names.
 
 1;
 __END__
+
+=head1 DISTRIBUTION INFORMATION
+
+This file was packaged with the Class-Meta-0.11 distribution.
+
+=head1 BUGS
+
+Please report all bugs via the CPAN Request Tracker at
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Class-Meta>.
 
 =head1 AUTHOR
 
