@@ -1,6 +1,6 @@
 package Class::Meta;
 
-# $Id: Meta.pm,v 1.94 2004/08/27 02:37:39 david Exp $
+# $Id: Meta.pm,v 1.97 2004/09/20 00:01:34 david Exp $
 
 =head1 NAME
 
@@ -566,6 +566,13 @@ that calls C<new()>.
 A key name that uniquely identifies a class within an application. Defaults to
 the value of the C<package> parameter if not specified.
 
+=item abstract
+
+A boolean indicating whether the class being defined is an abstract class. An
+abstract class, also known as a "virtual" class, is not intended to be used
+directly. No objects of an abstract class should every be created. Instead,
+classes that inherit from an abstract class must be implemented.
+
 =item class_class
 
 The name of a class that inherits from Class::Meta::Class to be used to create
@@ -646,7 +653,7 @@ use Class::Meta::Method;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.41";
+our $VERSION = "0.42";
 
 ##############################################################################
 # Private Package Globals
@@ -717,7 +724,7 @@ our $VERSION = "0.41";
         $p{attribute_class}   ||= 'Class::Meta::Attribute';
         $p{method_class}      ||= 'Class::Meta::Method';
 
-        # Instantiate a and cache Class object.
+        # Instantiate and cache Class object.
         $keys{$p{key}} = $classes{$p{package}} = $p{class_class}->new(\%p);
 
         # Copy its parents' attributes and return.
