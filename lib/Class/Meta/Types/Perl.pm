@@ -1,6 +1,6 @@
 package Class::Meta::Types::Perl;
 
-# $Id: Perl.pm 1071 2005-01-07 19:45:54Z theory $
+# $Id: Perl.pm 1462 2005-04-04 03:36:04Z theory $
 
 =head1 NAME
 
@@ -78,7 +78,7 @@ A code reference. Also known as a closure. C<UNIVERSAL::isa()> must return
 
 use strict;
 use Class::Meta::Type;
-our $VERSION = "0.46";
+our $VERSION = "0.47";
 
 sub import {
     my ($pkg, $builder) = @_;
@@ -133,8 +133,8 @@ __END__
 
 =head1 BUGS
 
-Please report all bugs via the CPAN Request Tracker at
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Class-Meta>.
+Please send bug reports to <bug-class-meta@rt.cpan.org> or report them via the
+CPAN Request Tracker at L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Class-Meta>.
 
 =head1 AUTHOR
 
@@ -176,7 +176,7 @@ Other data type modules:
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2002-2004, David Wheeler. All Rights Reserved.
+Copyright (c) 2002-2005, David Wheeler. All Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.

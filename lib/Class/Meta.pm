@@ -1,6 +1,6 @@
 package Class::Meta;
 
-# $Id: Meta.pm 1379 2005-03-09 18:27:05Z theory $
+# $Id: Meta.pm 1462 2005-04-04 03:36:04Z theory $
 
 =head1 NAME
 
@@ -575,6 +575,25 @@ abstract class, also known as a "virtual" class, is not intended to be used
 directly. No objects of an abstract class should every be created. Instead,
 classes that inherit from an abstract class must be implemented.
 
+=item trust
+
+An array reference of key names or packages that are trusted by the class.
+
+  trust => ['Foo::Bar', 'Foo::Bat'],
+
+Trusted packages and the classes that inherit from them can retrieve trusted
+attributes and methods of the class. Trusted packages need not be Class::Meta
+classes. Trusted classes do not include the declaring class by default, so if
+you want the class that declares an attribute to be able to use trusted
+attribute accessors, be sure to include it in the list of trusted packages:
+
+  trust => [__PACKAGE__, 'Foo::Bar', 'Foo::Bat'],
+
+If you need to trust a single class, you may pass in the key name or package
+of that class rather than an array reference:
+
+  trust => 'Foo::Bar',
+
 =item class_class
 
 The name of a class that inherits from Class::Meta::Class to be used to create
@@ -621,7 +640,8 @@ use strict;
 # View. These determine who can get metadata objects back from method calls.
 use constant PRIVATE   => 0x01;
 use constant PROTECTED => 0x02;
-use constant PUBLIC    => 0x03;
+use constant TRUSTED   => 0x03;
+use constant PUBLIC    => 0x04;
 
 # Authorization. These determine what kind of accessors (get, set, both, or
 # none) are available for a given attribute or method.
@@ -655,7 +675,7 @@ use Class::Meta::Method;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.46";
+our $VERSION = "0.47";
 
 ##############################################################################
 # Private Package Globals
@@ -774,9 +794,20 @@ following constants:
 
 =item Class::Meta::PUBLIC
 
+Can be used by any client.
+
 =item Class::Meta::PRIVATE
 
+Can only be used by the declaring class.
+
+=item Class::Meta::TRUSTED
+
+Can only be used by the classes specified by the C<trust> parameter to
+C<new()>.
+
 =item Class::Meta::PROTECTED
+
+Can only be used by the declaring class or by classes that inherit from it.
 
 =back
 
@@ -1095,7 +1126,8 @@ may not be easy.
 
 =head1 BUGS
 
-Please send bug reports to <bug-class-meta@rt.cpan.org>.
+Please send bug reports to <bug-class-meta@rt.cpan.org> or report them via the
+CPAN Request Tracker at L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Class-Meta>.
 
 =head1 AUTHOR
 
@@ -1157,7 +1189,7 @@ also supports serialization.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2002-2004, David Wheeler. All Rights Reserved.
+Copyright (c) 2002-2005, David Wheeler. All Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.

@@ -1,6 +1,6 @@
 package Class::Meta::Attribute;
 
-# $Id: Attribute.pm 1071 2005-01-07 19:45:54Z theory $
+# $Id: Attribute.pm 1462 2005-04-04 03:36:04Z theory $
 
 =head1 NAME
 
@@ -45,7 +45,7 @@ use strict;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.46";
+our $VERSION = "0.47";
 
 ##############################################################################
 # Constructors                                                               #
@@ -110,6 +110,7 @@ sub new {
                                      . "'$p{view}'")
           unless $p{view} == Class::Meta::PUBLIC
           or     $p{view} == Class::Meta::PROTECTED
+          or     $p{view} == Class::Meta::TRUSTED
           or     $p{view} == Class::Meta::PRIVATE;
     } else {
         # Make it public by default.
@@ -172,9 +173,13 @@ sub new {
 
     # Index its view.
     if ($p{view} > Class::Meta::PRIVATE) {
-        push @{$class->{prot_attr_ord}}, $p{name};
-        push @{$class->{attr_ord}}, $p{name}
-          if $p{view} == Class::Meta::PUBLIC;
+        push @{$class->{prot_attr_ord}}, $p{name}
+          unless $p{view} == Class::Meta::TRUSTED;
+        if ($p{view} > Class::Meta::PROTECTED) {
+            push @{$class->{trst_attr_ord}}, $p{name};
+            push @{$class->{attr_ord}}, $p{name}
+              if $p{view} == Class::Meta::PUBLIC;
+        }
     }
 
     # Store a reference to the class object.
@@ -248,6 +253,8 @@ values are defined by the following constants:
 =item Class::Meta::PUBLIC
 
 =item Class::Meta::PRIVATE
+
+=item Class::Meta::TRUSTED
 
 =item Class::Meta::PROTECTED
 
@@ -427,8 +434,8 @@ __END__
 
 =head1 BUGS
 
-Please report all bugs via the CPAN Request Tracker at
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Class-Meta>.
+Please send bug reports to <bug-class-meta@rt.cpan.org> or report them via the
+CPAN Request Tracker at L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Class-Meta>.
 
 =head1 AUTHOR
 
@@ -454,7 +461,7 @@ Other classes of interest within the Class::Meta distribution include:
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2002-2004, David Wheeler. All Rights Reserved.
+Copyright (c) 2002-2005, David Wheeler. All Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.

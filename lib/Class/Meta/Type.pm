@@ -1,6 +1,6 @@
 package Class::Meta::Type;
 
-# $Id: Type.pm 1071 2005-01-07 19:45:54Z theory $
+# $Id: Type.pm 1462 2005-04-04 03:36:04Z theory $
 
 =head1 NAME
 
@@ -41,7 +41,7 @@ use strict;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.46";
+our $VERSION = "0.47";
 
 ##############################################################################
 # Private Package Globals                                                    #
@@ -693,8 +693,8 @@ before creating your own.
 
 =head1 BUGS
 
-Please report all bugs via the CPAN Request Tracker at
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Class-Meta>.
+Please send bug reports to <bug-class-meta@rt.cpan.org> or report them via the
+CPAN Request Tracker at L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Class-Meta>.
 
 =head1 AUTHOR
 
@@ -753,7 +753,7 @@ explicit set accessor.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2002-2004, David Wheeler. All Rights Reserved.
+Copyright (c) 2002-2005, David Wheeler. All Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.

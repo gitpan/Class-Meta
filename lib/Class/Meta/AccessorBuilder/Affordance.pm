@@ -1,6 +1,6 @@
 package Class::Meta::AccessorBuilder::Affordance;
 
-# $Id: Affordance.pm 1071 2005-01-07 19:45:54Z theory $
+# $Id: Affordance.pm 1462 2005-04-04 03:36:04Z theory $
 
 =head1 NAME
 
@@ -194,7 +194,7 @@ be used in the set acccessor (mutator) to validate new attribute values.
 
 use strict;
 use Class::Meta;
-our $VERSION = "0.46";
+our $VERSION = "0.47";
 
 sub build_attr_get {
     UNIVERSAL::can($_[0]->package, 'get_' . $_[0]->name);
@@ -318,6 +318,24 @@ sub _build {
                 goto &$real_sub;
             };
         }
+    } elsif ($attr->view == Class::Meta::TRUSTED) {
+        # XXX Should we have an accessor for this?
+        my $trusted = $attr->class->{trusted};
+        for ($get, $set) {
+            my $real_sub = $_ or next;
+            $_ = sub {
+                my $caller = caller;
+                # Circumvent generated constructors.
+                for (my $i = 1; $caller eq 'Class::Meta::Constructor'; $i++) {
+                    $caller = caller($i);
+                }
+                goto &$real_sub if $caller eq $pkg;
+                for my $pack (@{$trusted}) {
+                    goto &$real_sub if UNIVERSAL::isa($caller, $pack);
+                }
+                $attr->class->handle_error("$name is a trusted attribute of $pkg");
+            };
+        }
     }
     return ($pkg, $attr, $name, $get, $set);
 }
@@ -327,8 +345,8 @@ __END__
 
 =head1 BUGS
 
-Please report all bugs via the CPAN Request Tracker at
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Class-Meta>.
+Please send bug reports to <bug-class-meta@rt.cpan.org> or report them via the
+CPAN Request Tracker at L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Class-Meta>.
 
 =head1 AUTHOR
 
@@ -360,7 +378,7 @@ generated accessors.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2002-2004, David Wheeler. All Rights Reserved.
+Copyright (c) 2002-2005, David Wheeler. All Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.
