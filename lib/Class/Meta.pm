@@ -1,6 +1,6 @@
 package Class::Meta;
 
-# $Id: Meta.pm,v 1.68 2004/01/28 21:57:26 david Exp $
+# $Id: Meta.pm,v 1.77 2004/04/19 23:36:20 david Exp $
 
 =head1 NAME
 
@@ -320,9 +320,9 @@ modules for more information.
 =head2 Accessors
 
 Class::Meta supports the creation of two different types of attribute
-accessors: typical Perl single-method accessors, and "affordance" accessors.
-The single accessors are named for their attributes, and typically tend
-to look like this:
+accessors: typical Perl single-method accessors, "affordance" accessors, and
+"semi-affordance" accessors. The single accessors are named for their
+attributes, and typically tend to look like this:
 
   sub tail {
       my $self = shift;
@@ -348,10 +348,24 @@ write-only accessors, one can't tell just by looking at them which is the
 case. The affordance accessors make this point moot, as they make clear what
 their purpose is.
 
+Semi-affordance accessors are similar to affordance accessors in that they
+provide at least two accessors for every attribute. However, the accessor that
+fetches the value is named for the attribute. Thus, they tend to look like
+this:
+
+  sub tail { shift->{tail} }
+
+  sub set_tail { shift->{tail} = shift }
+
 To get Class::Meta's data types to create affordance accessors, simply pass
 the string "affordance" to them when you load them:
 
-  use Class::Meta::Types::Perl 'affordances';
+  use Class::Meta::Types::Perl 'affordance';
+
+Likewise, to get them to create semi-affordance accessors, pass the string
+"semi-affordance":
+
+  use Class::Meta::Types::Perl 'semi-affordance';
 
 The boolean data type is the only one that uses a slightly different approach
 to the creation of affordance accessors: It creates three of them. Assuming
@@ -483,6 +497,47 @@ of their interfaces.
 =cut
 
 ##############################################################################
+# Class Methods
+##############################################################################
+
+=head1 INTERFACE
+
+=head2 Class Methods
+
+=head3 default_error_handler
+
+  Class::Meta->default_error_handler($code);
+  my $default_error_handler = Class::Meta->default_error_handler;
+
+Sets the default error handler for Class::Meta classes. If no C<error_handler>
+attribute is passed to new, then this error handler will be associated with
+the new class. The default default error handler uses C<Carp::croak()> to
+handle errors.
+
+Note that if other modules are using Class::Meta that they will use your
+default error handler unless you reset the default error handler to its
+original value before loading them.
+
+##############################################################################
+# Class Methods
+##############################################################################
+
+=head1 INTERFACE
+
+=head2 Class Methods
+
+=head3 default_error_handler
+
+  Class::Meta->default_error_handler($code);
+
+Sets the default error handler for Class::Meta classes. If no C<error_handler>
+attribute is passed to new, then this error handler will be associated with
+the new class. The default default error handler uses C<Carp::croak()> to
+handle errors.
+
+=cut
+
+##############################################################################
 # Constructors                                                               #
 ##############################################################################
 
@@ -532,6 +587,12 @@ Class::Meta::Attribute.
 The name of a class that inherits from Class::Meta::Method to be used to
 create all of the method objects for the class. Defaults to
 Class::Meta::Method.
+
+=item error_handler
+
+A code reference that will be used to handle errors thrown by the methods
+created for the new class. Defaults to the value returned by
+C<< Class::Meta->default_error_handler >>.
 
 =back
 
@@ -584,22 +645,41 @@ use Class::Meta::Method;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.20";
+our $VERSION = "0.30";
 
 ##############################################################################
 # Private Package Globals
 ##############################################################################
-my $croak = sub { require Carp; Carp::croak(@_) };
-
 {
     my %classes;
+    my $error_handler = sub {
+        require Carp;
+        our @CARP_NOT = qw(Class::Meta
+                           Class::Meta::Attribute
+                           Class::Meta::Constructor
+                           Class::Meta::Method
+                           Class::Meta::Type
+                           Class::Meta::Types::Numeric
+                           Class::Meta::Types::String
+                           Class::Meta::AccessorBuilder);
+        Carp::croak(@_);
+    };
+
+
+    sub default_error_handler {
+        shift;
+        return $error_handler unless @_;
+        $error_handler->("Error handler must be a code reference")
+          unless ref $_[0] eq 'CODE';
+        return $error_handler = shift;
+    }
 
     sub new {
         my $pkg = shift;
 
         # Make sure we can get all the arguments.
-        $croak->("Odd number of parameters in call to new() when named "
-                 . "parameters were expected" ) if @_ % 2;
+        $error_handler->("Odd number of parameters in call to new() when named "
+                         . "parameters were expected" ) if @_ % 2;
         my %p = @_;
 
         # Class defaults to caller. Key defaults to class.
@@ -610,6 +690,15 @@ my $croak = sub { require Carp; Carp::croak(@_) };
         $p{constructor_class} ||= 'Class::Meta::Constructor';
         $p{attribute_class}   ||= 'Class::Meta::Attribute';
         $p{method_class}      ||= 'Class::Meta::Method';
+
+        if (exists $p{error_handler}) {
+            $error_handler->("Error handler must be a code reference")
+              unless ref $p{error_handler} eq 'CODE';
+        } else {
+            $p{error_handler} = $pkg->default_error_handler;
+
+        }
+
 
         # Instantiate a Class object.
         $p{class} = $p{class_class}->new(\%p);
@@ -957,7 +1046,7 @@ may not be easy.
 
 =head1 DISTRIBUTION INFORMATION
 
-This file was packaged with the Class-Meta-0.20 distribution.
+This file was packaged with the Class-Meta-0.30 distribution.
 
 =head1 BUGS
 
@@ -1013,6 +1102,12 @@ Design by contract.
 =item L<Class::Tangram|Class::Tangram>
 
 Accessor automation and data validation for Tangram applications.
+
+=item L<Class::Maker|Class::Maker>
+
+An ambitious yet underdocumented module that also manages accessor and
+constructor generation, data validation, and provides a reflection API. It
+also supports serialization.
 
 =back
 

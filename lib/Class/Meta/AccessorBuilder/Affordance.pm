@@ -1,6 +1,6 @@
 package Class::Meta::AccessorBuilder::Affordance;
 
-# $Id: Affordance.pm,v 1.18 2004/01/28 21:57:26 david Exp $
+# $Id: Affordance.pm,v 1.22 2004/04/18 23:37:35 david Exp $
 
 =head1 NAME
 
@@ -136,7 +136,7 @@ create your own accessor generation code
 
 use strict;
 use Class::Meta;
-our $VERSION = "0.20";
+our $VERSION = "0.30";
 
 sub build_attr_get {
     UNIVERSAL::can($_[0]->package, 'get_' . $_[0]->name);
@@ -146,21 +146,27 @@ sub build_attr_set {
     UNIVERSAL::can($_[0]->package, 'set_' . $_[0]->name);
 }
 
-my $croak = sub {
-    require Carp;
-    our @CARP_NOT = qw(Class::Meta::Attribute);
-    Carp::croak(@_);
-};
-
 my $req_chk = sub {
-    $croak->("Attribute must be defined") unless defined $_[0];
+    $_[2]->class->handle_error("Attribute ", $_[2]->name, " must be defined")
+      unless defined $_[0];
 };
 
 my $once_chk = sub {
-    $croak->("Attribute can only be set once") if defined ${$_[1]};
+    $_[2]->class->handle_error("Attribute ", $_[2]->name,
+                               " can only be set once")
+      if defined $_[1]->{$_[2]->name};
 };
 
 sub build {
+    my ($pkg, $attr, $name, $get, $set) = __PACKAGE__->_build(@_);
+    # Install the accessors.
+    no strict 'refs';
+    *{"${pkg}::get_$name"} = $get if $get;
+    *{"${pkg}::set_$name"} = $set if $set;
+}
+
+sub _build {
+    shift;
     my ($pkg, $attr, $create, @checks) = @_;
     my $name = $attr->name;
 
@@ -186,7 +192,9 @@ sub build {
             if (@checks) {
                 $set = sub {
                     # Check the value passed in.
-                    $_->($_[1], \$data) for @checks;
+                    $_->($_[1], { $name => $data,
+                                  __pkg => ref $_[0] || $_[0] },
+                         $attr) for @checks;
                     # Assign the value.
                     $data = $_[1];
                 };
@@ -209,7 +217,7 @@ sub build {
             if (@checks) {
                 $set = sub {
                     # Check the value passed in.
-                    $_->($_[1], \$_[0]->{$name}) for @checks;
+                    $_->($_[1], $_[0], $attr) for @checks;
                     # Assign the value.
                     $_[0]->{$name} = $_[1];
                 };
@@ -232,7 +240,8 @@ sub build {
                 for (my $i = 1; $caller eq 'Class::Meta::Constructor'; $i++) {
                     $caller = caller($i);
                 }
-                $croak->("$name is a protected attribute of $pkg")
+                $attr->class->handle_error("$name is a protected attribute "
+                                             . "of $pkg")
                   unless UNIVERSAL::isa($caller, $pkg);
                 goto &$real_sub;
             };
@@ -246,17 +255,13 @@ sub build {
                 for (my $i = 1; $caller eq 'Class::Meta::Constructor'; $i++) {
                     $caller = caller($i);
                 }
-                $croak->("$name is a private attribute of $pkg")
-                  unless $caller eq $pkg;
+             $attr->class->handle_error("$name is a private attribute of $pkg")
+               unless $caller eq $pkg;
                 goto &$real_sub;
             };
         }
     }
-
-    # Install the accessors.
-    no strict 'refs';
-    *{"${pkg}::set_$name"} = $set if $set;
-    *{"${pkg}::get_$name"} = $get if $get;
+    return ($pkg, $attr, $name, $get, $set);
 }
 
 1;
@@ -264,7 +269,7 @@ __END__
 
 =head1 DISTRIBUTION INFORMATION
 
-This file was packaged with the Class-Meta-0.20 distribution.
+This file was packaged with the Class-Meta-0.30 distribution.
 
 =head1 BUGS
 

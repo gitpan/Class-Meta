@@ -1,6 +1,6 @@
 package Class::Meta::Types::String;
 
-# $Id: String.pm,v 1.10 2004/01/28 02:09:04 david Exp $
+# $Id: String.pm,v 1.13 2004/04/18 23:37:35 david Exp $
 
 =head1 NAME
 
@@ -14,6 +14,8 @@ Class::Meta::Types::String - String data types
   use Class::Meta::Types::String;
   # OR...
   # use Class::Meta::Types::String 'affordance';
+  # OR...
+  # use Class::Meta::Types::String 'semi-affordance';
 
   BEGIN {
       # Create a Class::Meta object for this class.
@@ -37,7 +39,7 @@ creating data types.
 
 use strict;
 use Class::Meta::Type;
-our $VERSION = "0.20";
+our $VERSION = "0.30";
 
 sub import {
     my ($pkg, $builder) = @_;
@@ -51,9 +53,7 @@ sub import {
         builder => $builder,
         check   => sub {
             return unless defined $_[0] && ref $_[0];
-            require Carp;
-            our @CARP_NOT = qw(Class::Meta::Attribute);
-            Carp::croak("Value '$_[0]' is not a valid string");
+            $_[2]->class->handle_error("Value '$_[0]' is not a valid string");
         }
     );
 }
@@ -63,7 +63,7 @@ __END__
 
 =head1 DISTRIBUTION INFORMATION
 
-This file was packaged with the Class-Meta-0.20 distribution.
+This file was packaged with the Class-Meta-0.30 distribution.
 
 =head1 BUGS
 

@@ -1,12 +1,12 @@
 #!perl -w
 
-# $Id: errors.t,v 1.3 2004/01/28 21:45:33 david Exp $
+# $Id: errors.t,v 1.6 2004/04/19 23:29:35 david Exp $
 
 ##############################################################################
 # Set up the tests.
 ##############################################################################
 use strict;
-use Test::More tests => 189;
+use Test::More tests => 202;
 
 BEGIN {
     main::use_ok('Class::Meta');
@@ -76,25 +76,26 @@ chk('No attribute get method', qr/Cannot get attribute 'foo'/);
 eval { $attr->set };
 chk('No attribute set method', qr/Cannot set attribute 'foo'/);
 
-eval { Class::Meta::Attribute->build };
+eval { $attr->build };
 chk('Attribute->build protected',
     qr/ cannot call Class::Meta::Attribute->build/);
 
 ##############################################################################
 # Test Class::Meta::Class errors.
-eval { Class::Meta::Class->new };
+eval { $cm->class->new };
 chk('Class->new protected',
     qr/ cannot create Class::Meta::Class objects/);
 
 eval { Class::Meta->new( package => 'foo' ) };
 chk('Duplicate class', qr/Class object for class 'foo' already exists/);
 
-eval { Class::Meta::Class->build };
+eval { $cm->class->build };
 chk('Class->build protected',
     qr/ cannot call Class::Meta::Class->build/);
 
 ##############################################################################
 # Test Class::Meta::Constructor errors.
+my $ctor = $cm->class->constructors('new');
 eval { Class::Meta::Constructor->new };
 chk('Constructor->new protected',
     qr/ cannot create Class::Meta::Constructor objects/);
@@ -113,8 +114,8 @@ chk('Invalid constructor name',
 
 # Create an constructor to use for a few tests. It's private so that it
 # can't be called from here.
-ok( my $ctor = $cm->add_constructor( name => 'newer',
-                                     view => Class::Meta::PRIVATE),
+ok( $ctor = $cm->add_constructor( name => 'newer',
+                                  view => Class::Meta::PRIVATE),
     "Create 'newer' constructor");
 
 eval { $cm->add_constructor( name => 'newer') };
@@ -130,7 +131,7 @@ chk("Invalid Constructor caller",
 eval { $ctor->call };
 chk('Cannot call constructor', qr/Cannot call constructor 'newer'/);
 
-eval { Class::Meta::Constructor->build };
+eval { $ctor->build };
 chk('Constructor->build protected',
     qr/ cannot call Class::Meta::Constructor->build/);
 
@@ -225,6 +226,32 @@ chk('No attr set', qr/No such function 'NoAttrSet::build_attr_set\(\)'/);
 
 eval { Class::Meta::Type->build };
 chk('Type->build protected', qr/ cannot call Class::Meta::Type->build/);
+
+eval { Class::Meta->default_error_handler('') };
+chk('Bad error handler', qr/Error handler must be a code reference/);
+
+# Make sure we get an error for invalid class error handlers.
+eval { Class::Meta->new(error_handler => '') };
+chk('Class cannot have invalid error handler',
+    qr/Error handler must be a code reference/);
+
+my $foo;
+Class::Meta->default_error_handler(sub { $foo = shift });
+
+# Some places still use the default, of course.
+eval {
+    Class::Meta::Type->add( key => 'foo',
+                            name => 'foo',
+                            builder => 'NoAttrSet');
+};
+like( $foo, qr/No such function 'NoAttrSet::build_attr_set\(\)'/,
+      "New error handler");
+
+# Others muse use the original, since the class object was defined before
+# we set up the new default.
+eval { $cm->class->build };
+chk('Class->build still protected',
+    qr/ cannot call Class::Meta::Class->build/);
 
 ##############################################################################
 # This function handles all the tests.

@@ -1,6 +1,6 @@
 package Class::Meta::Types::Numeric;
 
-# $Id: Numeric.pm,v 1.11 2004/01/28 02:09:04 david Exp $
+# $Id: Numeric.pm,v 1.14 2004/04/18 23:37:35 david Exp $
 
 =head1 NAME
 
@@ -14,6 +14,8 @@ Class::Meta::Types::Numeric - Numeric data types
   use Class::Meta::Types::Numeric;
   # OR...
   # use Class::Meta::Types::Numeric 'affordance';
+  # OR...
+  # use Class::Meta::Types::Numeric 'semi-affordance';
 
   BEGIN {
       # Create a Class::Meta object for this class.
@@ -72,13 +74,7 @@ A floating point number.
 use strict;
 use Class::Meta::Type;
 use Data::Types ();
-our $VERSION = "0.20";
-
-my $croak = sub {
-    require Carp;
-    our @CARP_NOT = qw(Class::Meta::Attribute);
-    Carp::croak(@_);
-};
+our $VERSION = "0.30";
 
 # This code ref builds value checkers.
 my $mk_chk = sub {
@@ -87,7 +83,8 @@ my $mk_chk = sub {
         sub {
             return unless defined $_[0];
             $code->($_[0])
-              or $croak->("Value '$_[0]' is not a valid $type");
+              or $_[2]->class->handle_error("Value '$_[0]' is not a valid "
+                                              . "$type");
             }
     ];
 };
@@ -146,7 +143,7 @@ __END__
 
 =head1 DISTRIBUTION INFORMATION
 
-This file was packaged with the Class-Meta-0.20 distribution.
+This file was packaged with the Class-Meta-0.30 distribution.
 
 =head1 BUGS
 

@@ -1,6 +1,6 @@
 package Class::Meta::AccessorBuilder;
 
-# $Id: AccessorBuilder.pm,v 1.19 2004/01/28 21:57:26 david Exp $
+# $Id: AccessorBuilder.pm,v 1.24 2004/04/19 22:16:46 david Exp $
 
 =head1 NAME
 
@@ -135,7 +135,7 @@ create your own accessor generation code
 
 use strict;
 use Class::Meta;
-our $VERSION = "0.20";
+our $VERSION = "0.30";
 
 sub build_attr_get {
     UNIVERSAL::can($_[0]->package, $_[0]->name);
@@ -143,18 +143,15 @@ sub build_attr_get {
 
 sub build_attr_set { &build_attr_get }
 
-my $croak = sub {
-    require Carp;
-    our @CARP_NOT = qw(Class::Meta::Attribute Class::Meta::Constructor);
-    Carp::croak(@_);
-};
-
 my $req_chk = sub {
-    $croak->("Attribute must be defined") unless defined $_[0];
+    $_[2]->class->handle_error("Attribute ", $_[2]->name, " must be defined")
+      unless defined $_[0];
 };
 
 my $once_chk = sub {
-    $croak->("Attribute can only be set once") if defined ${$_[1]};
+    $_[2]->class->handle_error("Attribute ", $_[2]->name,
+                               " can only be set once")
+      if defined $_[1]->{$_[2]->name};
 };
 
 sub build {
@@ -182,7 +179,9 @@ sub build {
             if (@checks) {
                 $sub = sub {
                     # Check the value passed in.
-                    $_->($_[1], \$data) for @checks;
+                    $_->($_[1], { $name => $data,
+                                  __pkg => ref $_[0] || $_[0] },
+                         $attr) for @checks;
                     # Assign the value.
                     $data = $_[1];
                     return;
@@ -202,7 +201,9 @@ sub build {
                     my $self = shift;
                     return $data unless @_;
                     # Check the value passed in.
-                    $_->($_[0], \$data) for @checks;
+                    $_->($_[1], { $name => $data,
+                                  __pkg => ref $self || $self },
+                         $attr) for @checks;
                     # Assign the value.
                     return $data = $_[0];
                 };
@@ -228,7 +229,7 @@ sub build {
             if (@checks) {
                 $sub = sub {
                     # Check the value passed in.
-                    $_->($_[1], \$_[0]->{$name}) for @checks;
+                    $_->($_[1], $_[0], $attr) for @checks;
                     # Assign the value.
                     $_[0]->{$name} = $_[1];
                     return;
@@ -248,7 +249,7 @@ sub build {
                     my $self = shift;
                     return $self->{$name} unless @_;
                     # Check the value passed in.
-                    $_->($_[0], \$self->{$name}) for @checks;
+                    $_->($_[0], $self, $attr) for @checks;
                     # Assign the value.
                     return $self->{$name} = $_[0];
                 };
@@ -274,7 +275,13 @@ sub build {
              for (my $i = 1; $caller eq 'Class::Meta::Constructor'; $i++) {
                  $caller = caller($i);
              }
-             $croak->("$name is a protected attribute of $pkg")
+
+             # XXX Why oh why does carp insist on making Constructor.pm the
+             # context?? So we use the deprecated $Carp::CarpLevel as a hack
+             # to get 'round it.
+             local $Carp::CarpLevel = 4,
+               $attr->class->handle_error("$name is a protected attribute "
+                                        . "of $pkg")
                unless UNIVERSAL::isa($caller, $pkg);
              goto &$real_sub;
         };
@@ -286,7 +293,12 @@ sub build {
              for (my $i = 1; $caller eq 'Class::Meta::Constructor'; $i++) {
                  $caller = caller($i);
              }
-             $croak->("$name is a private attribute of $pkg")
+
+             # XXX Why oh why does carp insist on making Constructor.pm the
+             # context?? So we use the deprecated $Carp::CarpLevel as a hack
+             # to get 'round it.
+             local $Carp::CarpLevel = 4,
+               $attr->class->handle_error("$name is a private attribute of $pkg")
                unless $caller eq $pkg;
              goto &$real_sub;
          };
@@ -302,7 +314,7 @@ __END__
 
 =head1 DISTRIBUTION INFORMATION
 
-This file was packaged with the Class-Meta-0.20 distribution.
+This file was packaged with the Class-Meta-0.30 distribution.
 
 =head1 BUGS
 
@@ -324,7 +336,13 @@ Class::Meta.
 
 =item L<Class::Meta::AccessorBuilder::Affordance|Class::Meta::AccessorBuilder::Affordance>
 
-This module generates affordance style accessors.
+This module generates affordance style accessors (e.g., C<get_foo()> and
+C<set_foo()>.
+
+=item L<Class::Meta::AccessorBuilder::SemiAffordance|Class::Meta::AccessorBuilder::SemiAffordance>
+
+This module generates semi-affordance style accessors (e.g., C<foo()> and
+C<set_foo()>.
 
 =item L<Class::Meta::Type|Class::Meta::Type>
 

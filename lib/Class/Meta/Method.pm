@@ -1,6 +1,6 @@
 package Class::Meta::Method;
 
-# $Id: Method.pm,v 1.29 2004/01/28 02:09:03 david Exp $
+# $Id: Method.pm,v 1.33 2004/04/18 23:37:35 david Exp $
 
 =head1 NAME
 
@@ -40,16 +40,7 @@ use strict;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.20";
-
-##############################################################################
-# Private Package Globals
-##############################################################################
-my $croak = sub {
-    require Carp;
-    our @CARP_NOT = qw(Class::Meta);
-    Carp::croak(@_);
-};
+our $VERSION = "0.30";
 
 ##############################################################################
 # Constructors                                                               #
@@ -64,31 +55,34 @@ sub new {
     # Check to make sure that only Class::Meta or a subclass is constructing a
     # Class::Meta::Method object.
     my $caller = caller;
-    $croak->("Package '$caller' cannot create " . __PACKAGE__ . " objects")
+    Class::Meta->default_error_handler->("Package '$caller' cannot create "
+                                         . __PACKAGE__ . " objects")
         unless UNIVERSAL::isa($caller, 'Class::Meta');
 
     # Make sure we can get all the arguments.
-    $croak->("Odd number of parameters in call to new() when named "
-             . "parameters were expected" ) if @_ % 2;
+    $spec->{class}->handle_error("Odd number of parameters in call to new() "
+                                 . "when named parameters were expected")
+      if @_ % 2;
+
     my %p = @_;
 
     # Validate the name.
-    $croak->("Parameter 'name' is required in call to new()")
-      unless $p{name};
-    $croak->("Method '$p{name}' is not a valid method name "
-             . "-- only alphanumeric and '_' characters allowed")
+    $spec->{class}->handle_error("Parameter 'name' is required in call to "
+                                 . "new()") unless $p{name};
+    $spec->{class}->handle_error("Method '$p{name}' is not a valid method "
+             . "name -- only alphanumeric and '_' characters allowed")
       if $p{name} =~ /\W/;
 
     # Make sure the name hasn't already been used for another method
     # or constructor.
-    $croak->("Method '$p{name}' already exists in class "
+    $spec->{class}->handle_error("Method '$p{name}' already exists in class "
              . "'$spec->{package}'")
       if exists $spec->{meths}{$p{name}}
       || exists $spec->{ctors}{$p{name}};
 
     # Check the visibility.
     if (exists $p{view}) {
-        $croak->("Not a valid view parameter: '$p{view}'")
+        $spec->{class}->handle_error("Not a valid view parameter: '$p{view}'")
           unless $p{view} == Class::Meta::PUBLIC
           ||     $p{view} == Class::Meta::PROTECTED
           ||     $p{view} == Class::Meta::PRIVATE;
@@ -99,7 +93,8 @@ sub new {
 
     # Check the context.
     if (exists $p{context}) {
-        $croak->("Not a valid context parameter: '$p{context}'")
+        $spec->{class}->handle_error("Not a valid context parameter: "
+                                     . "'$p{context}'")
           unless $p{context} == Class::Meta::OBJECT
           ||     $p{context} == Class::Meta::CLASS;
     } else {
@@ -110,7 +105,8 @@ sub new {
     # Validate or create the method caller if necessary.
     if ($p{caller}) {
         my $ref = ref $p{caller};
-        $croak->("Parameter caller must be a code reference")
+        $spec->{class}->handle_error("Parameter caller must be a code "
+                                     . "reference")
           unless $ref && $ref eq 'CODE'
       } else {
           $p{caller} = eval "sub { shift->$p{name}(\@_) }"
@@ -127,6 +123,9 @@ sub new {
         push @{$spec->{meth_ord}}, $p{name}
           if $p{view} == Class::Meta::PUBLIC;
     }
+
+    # Store a reference to the class object.
+    $p{class} = $spec->{class};
 
     # Let 'em have it.
     return $spec->{meths}{$p{name}};
@@ -196,6 +195,14 @@ object method. The possible values are defined by the following constants:
 
 =back
 
+=head3 class
+
+  my $class = $attr->class;
+
+Returns the Class::Meta::Class object that this method is associated
+with. Note that this object will always represent the class in which the
+method is defined, and I<not> any of its subclasses.
+
 =cut
 
 sub name    { $_[0]->{name}    }
@@ -204,21 +211,22 @@ sub desc    { $_[0]->{desc}    }
 sub label   { $_[0]->{label}   }
 sub view    { $_[0]->{view}    }
 sub context { $_[0]->{context} }
+sub class   { $_[0]->{class}   }
 
 =head3 call
 
   my $ret = $meth->call($obj, @args);
 
 Calls the method on the C<$obj> object, passing in any arguments. Note that it
-uses a C<goto> to execute the constructor, so the call to C<call()> itself
-will not appear in a call stack trace.
+uses a C<goto> to execute the method, so the call to C<call()> itself will not
+appear in a call stack trace.
 
 =cut
 
 sub call {
     my $self = shift;
     my $code = $self->{caller}
-      or $croak->("Cannot call method '", $self->name, "'");
+      or $self->class->handle_error("Cannot call method '", $self->name, "'");
     goto &$code;
 }
 
@@ -227,7 +235,7 @@ __END__
 
 =head1 DISTRIBUTION INFORMATION
 
-This file was packaged with the Class-Meta-0.20 distribution.
+This file was packaged with the Class-Meta-0.30 distribution.
 
 =head1 BUGS
 

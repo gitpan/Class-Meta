@@ -1,6 +1,6 @@
 package Class::Meta::Type;
 
-# $Id: Type.pm,v 1.28 2004/01/28 02:09:03 david Exp $
+# $Id: Type.pm,v 1.31 2004/04/18 23:37:35 david Exp $
 
 =head1 NAME
 
@@ -41,24 +41,16 @@ use strict;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.20";
+our $VERSION = "0.30";
 
 ##############################################################################
 # Private Package Globals                                                    #
 ##############################################################################
 my %def_builders = (
-    default => 'Class::Meta::AccessorBuilder',
-    affordance => 'Class::Meta::AccessorBuilder::Affordance',
+    'default'         => 'Class::Meta::AccessorBuilder',
+    'affordance'      => 'Class::Meta::AccessorBuilder::Affordance',
+    'semi-affordance' => 'Class::Meta::AccessorBuilder::SemiAffordance',
 );
-
-##############################################################################
-# Closure definition                                                         #
-##############################################################################
-my $croak = sub {
-    require Carp;
-    our @CARP_NOT = qw(Class::Meta Class::Meta::Attribute);
-    Carp::croak(@_);
-};
 
 # This code ref builds object/reference value checkers.
 my $mk_isachk = sub {
@@ -67,7 +59,8 @@ my $mk_isachk = sub {
         sub {
             return unless defined $_[0];
             UNIVERSAL::isa($_[0], $pkg)
-              or $croak->("Value '$_[0]' is not a valid $type")
+              or $_[2]->class->handle_error("Value '$_[0]' is not a valid "
+                                           . "$type");
             }
     ];
 };
@@ -152,8 +145,10 @@ types.
 =cut
 
     sub new {
-        my $key = lc $_[1] || $croak->("Type argument required");
-        $croak->("Type '$_[1]' does not exist") unless $types{$key};
+        my $key = lc $_[1]
+          || Class::Meta->default_error_handler->("Type argument required");
+        Class::Meta->default_error_handler->("Type '$_[1]' does not exist")
+            unless $types{$key};
         return bless $types{$key}, ref $_[0] || $_[0];
     }
 
@@ -192,11 +187,27 @@ The check parameter can be specified in any of the following ways:
 =item *
 
 As a code reference. When Class::Meta executes this code reference, it will
-pass in the value to check and a reference to the existing value. If the new
-value is not the proper value for your custom data type, the code reference
-should throw an exception. Here's an example; it's the code reference used by
-"string" data type, which you can add to Class::Meta::Type simply by using
-Class::Meta::Types::String:
+pass in the value to check, the object for which the attribute will be set,
+and the Class::Meta::Attribute object describing the attribute. If the attribute
+is a class attribute, then the second argument will not be an object, but a
+hash reference with two keys:
+
+=over 8
+
+=item $name
+
+The existing value for the attribute is stored under the attribute name.
+
+=item __pkg
+
+The name of the package to which the attribute is being assigned.
+
+=back
+
+If the new value is not the proper value for your custom data type, the code
+reference should throw an exception. Here's an example; it's the code
+reference used by "string" data type, which you can add to Class::Meta::Type
+simply by using Class::Meta::Types::String:
 
   check => sub {
       my $value = shift;
@@ -206,15 +217,16 @@ Class::Meta::Types::String:
       Carp::croak("Value '$value' is not a valid string");
   }
 
-Here's another example. This check code reference might be used to make sure
-that a new value is always greater than the existing value.
+Here's another example. This code reference might be used to make sure that a
+new value is always greater than the existing value.
 
   check => sub {
-      my ($new_val, $old_val_ref) = @_;
-      return if defined $new_val && $new_val > $$old_val_ref;
+      my ($new_val, $obj, $attr) = @_;
+      # Just return if the new value is greater than the old value.
+      return if defined $new_val && $new_val > $_[1]->{$_[2]->get_name};
       require Carp;
       our @CARP_NOT = qw(Class::Meta::Attribute);
-      Carp::croak("Value '$new_val' is not greater than '$$old_val_ref'");
+      Carp::croak("Value '$new_val' is not greater than '$old_val'");
   }
 
 =item *
@@ -267,6 +279,16 @@ mutator. See
 L<Class::Meta::AccessorBuilder::Affordance|Class::Meta::AccessorBuilder::Affordance>
 for more information.
 
+=item "semi-affordance"
+
+The string 'default' uses Class::Meta::Type's semi-affordance accessor
+building code, provided by Class::Meta::AccessorBuilder::SemiAffordance.
+Semi-affordance accessors differ from affordance accessors in that they do not
+prepend C<get_> to the accessor. So for an attribute "foo", the accessor would
+be named C<foo()> and the mutator named C<set_foo()>. See
+L<Class::Meta::AccessorBuilder::SemiAffordance|Class::Meta::AccessorBuilder::SemiAffordance>
+for more information.
+
 =item A Package Name
 
 Pass in the name of a package that contains the functions C<build()>,
@@ -284,25 +306,31 @@ accessor builders.
     sub add {
         my $pkg = shift;
         # Make sure we can process the parameters.
-        $croak->("Odd number of parameters in call to add() when named ",
-                 "parameters were expected" ) if @_ % 2;
+        Class::Meta->default_error_handler->("Odd number of parameters in "
+                                            . "call to new() when named "
+                                            . "parameters were expected")
+            if @_ % 2;
+
         my %params = @_;
 
         # Check required paremeters.
         foreach (qw(key name)) {
-            $croak->("Parameter '$_' is required") unless $params{$_};
+            Class::Meta->default_error_handler->("Parameter '$_' is required")
+                unless $params{$_};
         }
 
         # Check the key parameter.
         $params{key} = lc $params{key};
-        $croak->("Type '$params{key}' already defined")
+        Class::Meta->default_error_handler->("Type '$params{key}' already defined")
           if exists $types{$params{key}};
 
         # Set up the check croak.
         my $chk_die = sub {
-            $croak->("Paremter 'check' in call to add() must be a code ",
-                     "reference, an array of code references, or a ",
-                     "scalar naming an object type");
+            Class::Meta->default_error_handler->(
+              "Paremter 'check' in call to add() must be a code reference, "
+               . "an array of code references, or a scalar naming an object "
+               . "type"
+           );
         };
 
         # Check the check parameter.
@@ -331,13 +359,16 @@ accessor builders.
         eval "require $builder";
 
         $params{builder} = UNIVERSAL::can($builder, 'build')
-          || $croak->("No such function '${builder}::build()'");
+          || Class::Meta->default_error_handler->("No such function "
+                                                 . "'${builder}::build()'");
 
         $params{attr_get} = UNIVERSAL::can($builder, 'build_attr_get')
-          || $croak->("No such function '${builder}::build_attr_get()'");
+          || Class::Meta->default_error_handler->("No such function "
+                                                 . "'${builder}::build_attr_get()'");
 
         $params{attr_set} = UNIVERSAL::can($builder, 'build_attr_set')
-          || $croak->("No such function '${builder}::build_attr_set()'");
+          || Class::Meta->default_error_handler->("No such function "
+                                                 . "'${builder}::build_attr_set()'");
 
         # Okay, add the new type to the cache and construct it.
         $types{$params{key}} = \%params;
@@ -399,7 +430,8 @@ sub build {
     # Check to make sure that only Class::Meta or a subclass is building
     # attribute accessors.
     my $caller = caller;
-    $croak->("Package '$caller' cannot call " . __PACKAGE__ . "->build")
+    Class::Meta->default_error_handler->("Package '$caller' cannot call "
+                                         . __PACKAGE__ . "->build")
       unless UNIVERSAL::isa($caller, 'Class::Meta::Attribute');
 
     my $self = shift;
@@ -451,6 +483,8 @@ add the requisite C<builder> attribute:
                                      desc    => 'DateTime object',
                                      name    => 'DateTime Object' );
 
+The same goes for using semi-affordance accessors.
+
 Other than that, adding other data types is really a matter of the judicious
 use of the C<check> parameter. Ultimately, all attributes are scalar
 values. Whether they adhere to a particular data type depends entirely on the
@@ -487,11 +521,10 @@ C<set()> method.
 =head2 Custom Accessor Building
 
 Class::Meta also allows you to craft your own accessors. Perhaps you'd prefer
-a semi-affordance accessor standard, where the get accessor has the same name
-as your attribute, and the set accessor is preceded by C<set_>. In that case,
-you'll need to create your own module that builds accessors. I recommend that
-you study L<Class::Meta::AccessorBuilder|Class::Meta::AccessorBuilder> and
-LLClass::Meta::AccessorBuilder::Affordance|Class::Meta::AccessorBuilder::Affordance>
+to use a StudlyCaps affordance accessor standard. In that case, you'll need to
+create your own module that builds accessors. I recommend that you study
+L<Class::Meta::AccessorBuilder|Class::Meta::AccessorBuilder> and
+LClass::Meta::AccessorBuilder::Affordance|Class::Meta::AccessorBuilder::Affordance>
 before taking on creating your own.
 
 Custom accessor building modules must have three functions.
@@ -552,7 +585,7 @@ before creating your own.
 
 =head1 DISTRIBUTION INFORMATION
 
-This file was packaged with the Class-Meta-0.20 distribution.
+This file was packaged with the Class-Meta-0.30 distribution.
 
 =head1 BUGS
 
@@ -606,6 +639,11 @@ Standard Perl-style accessors.
 =item L<Class::Meta::AccessorBuilder::Affordance|Class::Meta::AccessorBuilder::Affordance>
 
 Affordance accessors--that is, explicit and independent get and set accessors.
+
+=item L<Class::Meta::AccessorBuilder::SemiAffordance|Class::Meta::AccessorBuilder::SemiAffordance>
+
+Semi-ffordance accessors--that is, independent get and set accessors with an
+explicit set accessor.
 
 =back
 
