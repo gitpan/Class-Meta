@@ -1,6 +1,6 @@
 #!perl -w
 
-# $Id: errors.t,v 1.1 2004/01/08 21:32:19 david Exp $
+# $Id: errors.t,v 1.3 2004/01/28 21:45:33 david Exp $
 
 ##############################################################################
 # Set up the tests.
@@ -70,10 +70,10 @@ for my $p (qw(view authz create context)) {
     chk("Invalid Attribute $p", qr/Not a valid $p parameter: '100'/);
 }
 
-eval { $attr->call_get };
+eval { $attr->get };
 chk('No attribute get method', qr/Cannot get attribute 'foo'/);
 
-eval { $attr->call_set };
+eval { $attr->set };
 chk('No attribute set method', qr/Cannot set attribute 'foo'/);
 
 eval { Class::Meta::Attribute->build };
@@ -225,8 +225,6 @@ chk('No attr set', qr/No such function 'NoAttrSet::build_attr_set\(\)'/);
 
 eval { Class::Meta::Type->build };
 chk('Type->build protected', qr/ cannot call Class::Meta::Type->build/);
-
-
 
 ##############################################################################
 # This function handles all the tests.

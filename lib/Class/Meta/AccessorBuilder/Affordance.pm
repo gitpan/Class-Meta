@@ -1,6 +1,6 @@
 package Class::Meta::AccessorBuilder::Affordance;
 
-# $Id: Affordance.pm,v 1.15 2004/01/20 22:36:44 david Exp $
+# $Id: Affordance.pm,v 1.18 2004/01/28 21:57:26 david Exp $
 
 =head1 NAME
 
@@ -91,6 +91,14 @@ way designed by Class::Data::Inheritable, although this might be changed in a
 future release. For now, I expect that the current simple approach will cover
 the vast majority of circumstances.
 
+B<Note:> Class attribute accessors will not work accurately in multiprocess
+environments such as mod_perl. If you change a class attribute's value in one
+process, it will not be changed in any of the others. Furthermore, class
+attributes are not currently shared across threads. So if you're using
+Class::Meta class attributes in a multi-threaded environment (such as iThreads
+in Perl 5.8.0 and later) the changes to a class attribute in one thread will
+not be reflected in other threads.
+
 =head1 Private and Protected Attributes
 
 Any attributes that have their C<view> attribute set to Class::Meta::Private
@@ -128,7 +136,7 @@ create your own accessor generation code
 
 use strict;
 use Class::Meta;
-our $VERSION = "0.14";
+our $VERSION = "0.20";
 
 sub build_attr_get {
     UNIVERSAL::can($_[0]->package, 'get_' . $_[0]->name);
@@ -148,14 +156,21 @@ my $req_chk = sub {
     $croak->("Attribute must be defined") unless defined $_[0];
 };
 
+my $once_chk = sub {
+    $croak->("Attribute can only be set once") if defined ${$_[1]};
+};
+
 sub build {
     my ($pkg, $attr, $create, @checks) = @_;
     my $name = $attr->name;
 
     # Add the required check, if needed.
     unshift @checks, $req_chk if $attr->required;
-    my ($get, $set);
 
+    # Add a once check, if needed.
+    unshift @checks, $once_chk if $attr->once;
+
+    my ($get, $set);
     if ($attr->context == Class::Meta::CLASS) {
         # Create class attribute accessors by creating a closure tha
         # references this variable.
@@ -171,7 +186,7 @@ sub build {
             if (@checks) {
                 $set = sub {
                     # Check the value passed in.
-                    $_->($_[1]) for @checks;
+                    $_->($_[1], \$data) for @checks;
                     # Assign the value.
                     $data = $_[1];
                 };
@@ -194,7 +209,7 @@ sub build {
             if (@checks) {
                 $set = sub {
                     # Check the value passed in.
-                    $_->($_[1]) for @checks;
+                    $_->($_[1], \$_[0]->{$name}) for @checks;
                     # Assign the value.
                     $_[0]->{$name} = $_[1];
                 };
@@ -249,7 +264,7 @@ __END__
 
 =head1 DISTRIBUTION INFORMATION
 
-This file was packaged with the Class-Meta-0.14 distribution.
+This file was packaged with the Class-Meta-0.20 distribution.
 
 =head1 BUGS
 
