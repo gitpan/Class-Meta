@@ -1,6 +1,6 @@
 package Class::Meta;
 
-# $Id: Meta.pm,v 1.77 2004/04/19 23:36:20 david Exp $
+# $Id: Meta.pm,v 1.80 2004/04/20 18:24:58 david Exp $
 
 =head1 NAME
 
@@ -518,22 +518,15 @@ Note that if other modules are using Class::Meta that they will use your
 default error handler unless you reset the default error handler to its
 original value before loading them.
 
-##############################################################################
-# Class Methods
-##############################################################################
+=head3 handle_error
 
-=head1 INTERFACE
+  Class::Meta->handle_error($err);
 
-=head2 Class Methods
-
-=head3 default_error_handler
-
-  Class::Meta->default_error_handler($code);
-
-Sets the default error handler for Class::Meta classes. If no C<error_handler>
-attribute is passed to new, then this error handler will be associated with
-the new class. The default default error handler uses C<Carp::croak()> to
-handle errors.
+Uses the code reference returned by C<default_error_handler()> to handle an
+error. Used internally Class::Meta classes when no Class::Meta::Class object
+is available. Probably not useful outside of Class::Meta unless you're
+creating your own accessor generation class. Use the C<handle_error()>
+instance method in Class::Meta::Class, instead.
 
 =cut
 
@@ -645,7 +638,7 @@ use Class::Meta::Method;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.30";
+our $VERSION = "0.31";
 
 ##############################################################################
 # Private Package Globals
@@ -662,9 +655,13 @@ our $VERSION = "0.30";
                            Class::Meta::Types::Numeric
                            Class::Meta::Types::String
                            Class::Meta::AccessorBuilder);
+        # XXX Make sure Carp doesn't point to Class/Meta/Constructor.pm when
+        # an exception is thrown by Class::Meta::AccessorBuilder. I have no
+        # idea why this is necessary for AccessorBuilder but no where else!
+        @Class::Meta::AccessorBuilder::CARP_NOT = @CARP_NOT
+          if caller(1) eq 'Class::Meta::AccessorBuilder';
         Carp::croak(@_);
     };
-
 
     sub default_error_handler {
         shift;
@@ -672,6 +669,11 @@ our $VERSION = "0.30";
         $error_handler->("Error handler must be a code reference")
           unless ref $_[0] eq 'CODE';
         return $error_handler = shift;
+    }
+
+    sub handle_error {
+        shift;
+        $error_handler->(@_);
     }
 
     sub new {
@@ -1046,7 +1048,7 @@ may not be easy.
 
 =head1 DISTRIBUTION INFORMATION
 
-This file was packaged with the Class-Meta-0.30 distribution.
+This file was packaged with the Class-Meta-0.31 distribution.
 
 =head1 BUGS
 

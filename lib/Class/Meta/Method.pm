@@ -1,6 +1,6 @@
 package Class::Meta::Method;
 
-# $Id: Method.pm,v 1.33 2004/04/18 23:37:35 david Exp $
+# $Id: Method.pm,v 1.35 2004/04/20 12:59:12 david Exp $
 
 =head1 NAME
 
@@ -40,7 +40,7 @@ use strict;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.30";
+our $VERSION = "0.31";
 
 ##############################################################################
 # Constructors                                                               #
@@ -55,8 +55,8 @@ sub new {
     # Check to make sure that only Class::Meta or a subclass is constructing a
     # Class::Meta::Method object.
     my $caller = caller;
-    Class::Meta->default_error_handler->("Package '$caller' cannot create "
-                                         . __PACKAGE__ . " objects")
+    Class::Meta->handle_error("Package '$caller' cannot create " . __PACKAGE__
+                              . " objects")
         unless UNIVERSAL::isa($caller, 'Class::Meta');
 
     # Make sure we can get all the arguments.
@@ -235,7 +235,7 @@ __END__
 
 =head1 DISTRIBUTION INFORMATION
 
-This file was packaged with the Class-Meta-0.30 distribution.
+This file was packaged with the Class-Meta-0.31 distribution.
 
 =head1 BUGS
 
