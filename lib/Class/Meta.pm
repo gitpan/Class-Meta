@@ -1,6 +1,6 @@
 package Class::Meta;
 
-# $Id: Meta.pm,v 1.97 2004/09/20 00:01:34 david Exp $
+# $Id: Meta.pm,v 1.99 2004/09/20 06:22:38 david Exp $
 
 =head1 NAME
 
@@ -653,7 +653,7 @@ use Class::Meta::Method;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.42";
+our $VERSION = "0.43";
 
 ##############################################################################
 # Private Package Globals
@@ -910,6 +910,10 @@ accessor, you'd specify it like this:
                       type   => $type,
                       authz  => Class::Meta::RDWR,
                       create => Class::Meta::NONE );
+
+Just be sure that your custom accessor is compiles before you call
+C<< $cm->build >> so that Class::Meta::Attribute can get a handle on it for
+its C<get()> and/or C<set()> methods.
 
 =item context
 

@@ -1,6 +1,6 @@
 package Class::Meta::Class;
 
-# $Id: Class.pm,v 1.53 2004/09/19 23:54:09 david Exp $
+# $Id: Class.pm,v 1.55 2004/09/20 05:41:52 david Exp $
 
 =head1 NAME
 
@@ -56,7 +56,7 @@ use Class::Meta::Method;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.42";
+our $VERSION = "0.43";
 our @CARP_NOT = qw(Class::Meta);
 
 =head1 INTERFACE
@@ -268,7 +268,7 @@ the time the Class::Meta::Class object was created.
 
 sub handle_error {
     my $code = shift->{error_handler};
-    $code->(@_)
+    $code->(join '', @_)
 }
 
 ##############################################################################
