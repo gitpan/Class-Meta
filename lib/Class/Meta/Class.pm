@@ -1,6 +1,6 @@
 package Class::Meta::Class;
 
-# $Id: Class.pm 682 2004-09-28 05:59:10Z theory $
+# $Id: Class.pm 920 2004-12-13 22:53:57Z theory $
 
 =head1 NAME
 
@@ -42,6 +42,10 @@ Class::Meta::Class objects are created by Class::Meta; they are never
 instantiated directly in client code. To access the class object for a
 Class::Meta-generated class, simply call its C<my_class()> method.
 
+At this point, those attributes tend to be database-specific. Once other types
+of data stores are added (XML, LDAP, etc.), other attributes may be added to
+allow their schemas to be built, as well.
+
 =cut
 
 ##############################################################################
@@ -56,7 +60,7 @@ use Class::Meta::Method;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.44";
+our $VERSION = "0.45";
 our @CARP_NOT = qw(Class::Meta);
 
 =head1 INTERFACE
@@ -252,6 +256,23 @@ sub methods {
         : $self->{meth_ord};
     return unless $list;
     return @$list == 1 ? $objs->{$list->[0]} : @{$objs}{@$list};
+}
+
+##############################################################################
+
+=head3 parents
+
+  my @parents = $class->parents;
+
+Returns a list of Class::Meta::Class objects representing all of the
+Class::Meta-built parent classes of a class.
+
+=cut
+
+sub parents {
+    my $self = shift;
+    return map { $_->my_class } grep { UNIVERSAL::can($_, 'my_class') }
+      Class::ISA::super_path($self->package);
 }
 
 ##############################################################################

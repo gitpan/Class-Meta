@@ -1,6 +1,6 @@
 package Class::Meta::Attribute;
 
-# $Id: Attribute.pm 682 2004-09-28 05:59:10Z theory $
+# $Id: Attribute.pm 802 2004-10-28 23:21:10Z theory $
 
 =head1 NAME
 
@@ -45,7 +45,7 @@ use strict;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.44";
+our $VERSION = "0.45";
 
 ##############################################################################
 # Constructors                                                               #
@@ -402,8 +402,10 @@ sub build {
       unless UNIVERSAL::isa($caller, 'Class::Meta')
         || UNIVERSAL::isa($caller, __PACKAGE__);
 
-    # Get the data type object and assemble the validation checks.
+    # Get the data type object, replace any alias, and assemble the
+    # validation checks.
     my $type = Class::Meta::Type->new($self->{type});
+    $self->{type} = $type->key;
     my $create = delete $self->{create};
     $type->build($class->{package}, $self, $create)
       if $create != Class::Meta::NONE;

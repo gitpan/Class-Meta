@@ -1,5 +1,18 @@
 Revision history for Perl extension Class::Meta.
 
+0.45  2005-01-07T19:41:41
+      - Added "parents()" method to Class::Meta::Class to return the class
+        objects for any classes that the class inherits from.
+      - Attributes that use an alias to set their types will now have the
+        alias converted to the canonical type key.
+      - Fixed typo in Class::Meta that named the generated method "class()"
+        instead of "my_class()". Reported by Curtis Poe.
+      - Documented "bool" synonym for the "boolean" data type in the
+        Class::Meta library documentation (it was already documented in
+        Class::Meta::Types::Boolean, of course).
+      - Fixed broken links to Class::Meta::Types classes in Class::Meta
+        library documentation. Reported by Curtis Poe.
+
 0.44  2004-10-28T01:25:12
       - Classes created by Class::Meta will now be used as data types. This
         saves the developer having to generate classes *and* add the new
