@@ -1,6 +1,6 @@
 package Class::Meta;
 
-# $Id: Meta.pm,v 1.91 2004/08/27 01:53:21 david Exp $
+# $Id: Meta.pm,v 1.94 2004/08/27 02:37:39 david Exp $
 
 =head1 NAME
 
@@ -528,6 +528,16 @@ is available. Probably not useful outside of Class::Meta unless you're
 creating your own accessor generation class. Use the C<handle_error()>
 instance method in Class::Meta::Class, instead.
 
+=head3 for_key
+
+  my $class = Class::Meta->for_key($key);
+
+Returns the Class::Meta::Class object for a class by its key name. This can be
+useful in circumstances where the key has been used to track a class, and you
+need to get a handle on that class. With the class package name, you can of
+course simply call C<< $pkg->my_class >>; this method is the solution for
+getting the class object for a class key.
+
 =cut
 
 ##############################################################################
@@ -636,13 +646,13 @@ use Class::Meta::Method;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.40";
+our $VERSION = "0.41";
 
 ##############################################################################
 # Private Package Globals
 ##############################################################################
 {
-    my %classes;
+    my (%classes, %keys);
     my $error_handler = sub {
         require Carp;
         our @CARP_NOT = qw(Class::Meta
@@ -675,6 +685,8 @@ our $VERSION = "0.40";
         $error_handler->(@_);
     }
 
+    sub for_key { $keys{$_[1]} }
+
     sub new {
         my $pkg = shift;
 
@@ -706,7 +718,7 @@ our $VERSION = "0.40";
         $p{method_class}      ||= 'Class::Meta::Method';
 
         # Instantiate a and cache Class object.
-        $classes{$p{package}} = $p{class_class}->new(\%p);
+        $keys{$p{key}} = $classes{$p{package}} = $p{class_class}->new(\%p);
 
         # Copy its parents' attributes and return.
         $classes{$p{package}}->_inherit( \%classes, 'attr');
@@ -1018,18 +1030,18 @@ C<my_class()> class method, and all requisite constructors and accessors.
         my $class = $classes{ $self->{package} };
 
         # Build the attribute accessors.
-        if (my $objs = $class->{build_attr_ord}) {
-            $_->build($class) for @$objs;
+        if (my $attrs = $class->{build_attr_ord}) {
+            $_->build($class) for @$attrs;
         }
 
         # Build the constructors.
-        if (my $objs = $class->{build_ctor_ord}) {
-            $_->build(\%classes) for @$objs;
+        if (my $ctors = $class->{build_ctor_ord}) {
+            $_->build(\%classes) for @$ctors;
         }
 
         # Build the methods.
-        if (my $objs = $class->{build_meth_ord}) {
-            $_->build(\%classes) for @$objs;
+        if (my $meths = $class->{build_meth_ord}) {
+            $_->build(\%classes) for @$meths;
         }
 
         # Build the class; it needs to get at the data added by the above
