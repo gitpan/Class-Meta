@@ -1,6 +1,6 @@
 package Class::Meta::Attribute;
 
-# $Id: Attribute.pm 1462 2005-04-04 03:36:04Z theory $
+# $Id: Attribute.pm 1492 2005-04-07 19:19:38Z theory $
 
 =head1 NAME
 
@@ -45,7 +45,7 @@ use strict;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.47";
+our $VERSION = "0.48";
 
 ##############################################################################
 # Constructors                                                               #
@@ -163,13 +163,6 @@ sub new {
 
     # Create and cache the attribute object.
     $class->{attrs}{$p{name}} = bless \%p, ref $pkg || $pkg;
-
-    my $def = defined $class->{attrs}{$p{name}}->default;
-    if ($p{once} && $def && $p{create} >= Class::Meta::SET) {
-        # No need to generate a mutator for required values that can only be
-        # set once.
-        $p{create} = Class::Meta::GET;
-    }
 
     # Index its view.
     if ($p{view} > Class::Meta::PRIVATE) {
