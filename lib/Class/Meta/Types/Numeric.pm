@@ -1,6 +1,6 @@
 package Class::Meta::Types::Numeric;
 
-# $Id: Numeric.pm 1477 2005-04-05 16:34:46Z theory $
+# $Id: Numeric.pm 1527 2005-04-13 21:37:23Z theory $
 
 =head1 NAME
 
@@ -74,7 +74,7 @@ A floating point number.
 use strict;
 use Class::Meta::Type;
 use Data::Types ();
-our $VERSION = "0.48";
+our $VERSION = "0.49";
 
 # This code ref builds value checkers.
 my $mk_chk = sub {

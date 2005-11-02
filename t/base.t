@@ -1,13 +1,14 @@
 #!perl -w
 
-# $Id: base.t 682 2004-09-28 05:59:10Z theory $
+# $Id: base.t 1889 2005-07-13 01:31:50Z curtis $
 
 ##############################################################################
 # Set up the tests.
 ##############################################################################
 
 use strict;
-use Test::More tests => 119;
+#use Test::More tests => 130;
+use Test::More 'no_plan';
 
 ##############################################################################
 # Create a simple class.
@@ -90,15 +91,42 @@ BEGIN {
                    );
 
     # Add a couple of custom methods.
-    $c->add_method( name  => 'chk_pass',
-                    view  => Class::Meta::PUBLIC,
+    $c->add_method( name    => 'chk_pass',
+                    view    => Class::Meta::PUBLIC,
+                    args    => ['string', 'string'],
+                    returns => 'bool',
                 );
 
-    $c->add_method( name  => 'shame',
-                    view  => Class::Meta::PUBLIC,
+    $c->add_method( name    => 'shame',
+                    view    => Class::Meta::PUBLIC,
+                    returns => 'person',
                 );
 
     $c->build;
+
+    my $d = Class::Meta->new(
+        key     => 'green_monkey',
+        package => 'Class::Meta::GreenMonkey',
+        name    => 'Class::Meta::GreenMonkey Class',
+        desc    => 'Special monkey class just for testing Class::Meta.',
+    );
+
+    # Add a constructor.
+    $d->add_constructor( name => 'new',
+                         create  => 1 );
+
+    # Add a couple of attributes with created methods.
+    $d->add_attribute( name     => 'id',
+                       view     => Class::Meta::PUBLIC,
+                       authz    => Class::Meta::READ,
+                       create   => Class::Meta::GET,
+                       type     => 'integer',
+                       label    => 'ID',
+                       desc     => "The monkey object's ID.",
+                       required => 1,
+                       default  => 12,
+                   );
+    $d->build;
 }
 
 sub chk_pass {
@@ -269,6 +297,10 @@ isa_ok($methods[1], 'Class::Meta::Method',
 is( $methods[0]->name, 'chk_pass', 'First method' );
 is( $methods[1]->name, 'shame', 'Second method' );
 is( $methods[0]->class, $class, "Check method class" );
+is_deeply( $methods[0]->args, ['string', 'string'], "Check method args" );
+is( $methods[0]->returns, 'bool', "Check method returns" );
+is( $methods[1]->args, undef, 'Second specific method args' );
+is( $methods[1]->returns, 'person', 'Second specific method returns' );
 
 # Get a few specific methods.
 ok( @methods = $class->methods(qw(shame chk_pass)),
@@ -302,4 +334,29 @@ is( $constructors[0]->name, 'new', 'Check specific constructor' );
 # Try getting the class object via the for_key() class method.
 is( Class::Meta->for_key($class->key), $class, "for_key returns class" );
 
+# Try getting a list of all class object keys
+can_ok( 'Class::Meta', 'keys' );
+ok( my $keys = Class::Meta->keys, 'Calling keys in scalar context should succeed');
+is( ref $keys, 'ARRAY', 'And it should return an array ref');
+@$keys = sort @$keys;
+is_deeply($keys, [qw/green_monkey person/], 'And keys should return the correct keys');
+
+ok( my @keys = Class::Meta->keys, 'Calling keys in list context should succeed');
+is(scalar @keys, 2, 'And it should return the correct number of keys');
+@keys = sort @keys;
+is_deeply(\@keys, [qw/green_monkey person/], 'And keys should return the correct keys');
+
+# try deleting the class object classes
+can_ok('Class::Meta', 'clear');
+Class::Meta->clear('green_monkey');
+@keys = Class::Meta->keys;
+is_deeply(\@keys, ['person'], 'And it should delete a key if provided with one');
+
+Class::Meta->clear('no_such_key');
+@keys = Class::Meta->keys;
+is_deeply(\@keys, ['person'], 'But deleting a non-existent key should be a no-op');
+
+Class::Meta->clear;
+@keys = Class::Meta->keys;
+is_deeply(\@keys, [], 'And calling it without arguments should remove all keys');
 __END__

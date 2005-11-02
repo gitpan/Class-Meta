@@ -1,6 +1,6 @@
 package Class::Meta::Method;
 
-# $Id: Method.pm 1477 2005-04-05 16:34:46Z theory $
+# $Id: Method.pm 1570 2005-04-26 16:50:33Z theory $
 
 =head1 NAME
 
@@ -40,7 +40,7 @@ use strict;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.48";
+our $VERSION = "0.49";
 
 =head1 INTERFACE
 
@@ -207,6 +207,17 @@ object method. The possible values are defined by the following constants:
 
 =back
 
+=head3 args
+
+A description of the arguments to the method. This can be anything you like,
+but I recommend something like a string for a single argument, an array
+reference for a list of arguments, or a hash reference for parameter
+arguments.
+
+=head3 returns
+
+A description of the return value or values of the method.
+
 =head3 class
 
   my $class = $meth->class;
@@ -223,6 +234,8 @@ sub desc    { $_[0]->{desc}    }
 sub label   { $_[0]->{label}   }
 sub view    { $_[0]->{view}    }
 sub context { $_[0]->{context} }
+sub args    { $_[0]->{args}    }
+sub returns { $_[0]->{returns} }
 sub class   { $_[0]->{class}   }
 
 =head3 call

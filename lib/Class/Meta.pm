@@ -1,6 +1,6 @@
 package Class::Meta;
 
-# $Id: Meta.pm 1477 2005-04-05 16:34:46Z theory $
+# $Id: Meta.pm 2170 2005-11-02 03:10:24Z theory $
 
 =head1 NAME
 
@@ -540,6 +540,27 @@ need to get a handle on that class. With the class package name, you can of
 course simply call C<< $pkg->my_class >>; this method is the solution for
 getting the class object for a class key.
 
+=head3 keys
+
+  my @keys = Class::Meta->keys;
+
+Returns the keys for all Class::Meta::Class objects.  The order of keys is
+not guaranteed.  In scalar context, this method returns an array reference
+containing the keys.
+
+=head3 clear
+
+  Class::Meta->clear;
+  Class::Meta->clear($key);
+
+Called without arguments, C<clear> will remove all
+L<Class::Meta::Class|Class::Meta::Class> objects from memory. Called with an
+argument, C<clear> attempts to remove only that key from memory. Calling it
+with a non-existent key is a no-op.
+
+In general, you probably won't want to use this method, except perhaps in
+tests, when you might need to do funky things with your classes.
+
 =cut
 
 ##############################################################################
@@ -675,7 +696,7 @@ use Class::Meta::Method;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.48";
+our $VERSION = "0.49";
 
 ##############################################################################
 # Private Package Globals
@@ -715,6 +736,10 @@ our $VERSION = "0.48";
     }
 
     sub for_key { $keys{$_[1]} }
+
+    sub keys    { wantarray ? keys %keys : [keys %keys] }
+
+    sub clear   { shift; @_ ? delete $keys{+shift} : undef %keys }
 
     sub new {
         my $pkg = shift;
@@ -1029,6 +1054,17 @@ for a description of its value.
 A code reference that calls the method. Defaults to a code reference that
 calls a method with the name provided by the C<name> attribute on the class
 being defined.
+
+=item args
+
+A description of the arguments to the method. This can be anything you like,
+but I recommend something like a string for a single argument, an array
+reference for a list of arguments, or a hash reference for parameter
+arguments.
+
+=item returns
+
+A string describing the return value or values of the method.
 
 =back
 
