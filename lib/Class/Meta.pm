@@ -1,6 +1,6 @@
 package Class::Meta;
 
-# $Id: Meta.pm 2170 2005-11-02 03:10:24Z theory $
+# $Id: Meta.pm 2289 2005-12-08 05:57:01Z theory $
 
 =head1 NAME
 
@@ -321,7 +321,7 @@ modules for more information.
 
 =head2 Accessors
 
-Class::Meta supports the creation of two different types of attribute
+Class::Meta supports the creation of three different types of attribute
 accessors: typical Perl single-method accessors, "affordance" accessors, and
 "semi-affordance" accessors. The single accessors are named for their
 attributes, and typically tend to look like this:
@@ -335,7 +335,7 @@ attributes, and typically tend to look like this:
 Although this can be an oversimplification if the data type has associated
 validation checks.
 
-Affordance accessors provide at least two accessors for every attribute: One
+Affordance accessors provide at up to two accessors for every attribute: One
 to set the value and one to retrieve the value. They tend to look like this:
 
   sub get_tail { shift->{tail} }
@@ -696,7 +696,7 @@ use Class::Meta::Method;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.49";
+our $VERSION = "0.50";
 
 ##############################################################################
 # Private Package Globals
@@ -969,7 +969,7 @@ accessor, you'd specify it like this:
                       authz  => Class::Meta::RDWR,
                       create => Class::Meta::NONE );
 
-Just be sure that your custom accessor is compiles before you call
+Just be sure that your custom accessor compiles before you call
 C<< $cm->build >> so that Class::Meta::Attribute can get a handle on it for
 its C<get()> and/or C<set()> methods.
 

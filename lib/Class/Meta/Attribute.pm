@@ -1,6 +1,6 @@
 package Class::Meta::Attribute;
 
-# $Id: Attribute.pm 1527 2005-04-13 21:37:23Z theory $
+# $Id: Attribute.pm 2384 2005-12-14 04:27:23Z theory $
 
 =head1 NAME
 
@@ -45,7 +45,7 @@ use strict;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.49";
+our $VERSION = "0.50";
 
 ##############################################################################
 # Constructors                                                               #
@@ -165,6 +165,7 @@ sub new {
     $class->{attrs}{$p{name}} = bless \%p, ref $pkg || $pkg;
 
     # Index its view.
+    push @{ $class->{all_attr_ord} }, $p{name};
     if ($p{view} > Class::Meta::PRIVATE) {
         push @{$class->{prot_attr_ord}}, $p{name}
           unless $p{view} == Class::Meta::TRUSTED;

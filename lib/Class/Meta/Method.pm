@@ -1,6 +1,6 @@
 package Class::Meta::Method;
 
-# $Id: Method.pm 1570 2005-04-26 16:50:33Z theory $
+# $Id: Method.pm 2384 2005-12-14 04:27:23Z theory $
 
 =head1 NAME
 
@@ -40,7 +40,7 @@ use strict;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.49";
+our $VERSION = "0.50";
 
 =head1 INTERFACE
 
@@ -126,6 +126,7 @@ sub new {
     $class->{meths}{$p{name}} = bless \%p, ref $pkg || $pkg;
 
     # Index its view.
+    push @{ $class->{all_meth_ord} }, $p{name};
     if ($p{view} > Class::Meta::PRIVATE) {
         push @{$class->{prot_meth_ord}}, $p{name}
           unless $p{view} == Class::Meta::TRUSTED;
