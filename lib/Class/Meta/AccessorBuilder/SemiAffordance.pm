@@ -1,6 +1,6 @@
 package Class::Meta::AccessorBuilder::SemiAffordance;
 
-# $Id: SemiAffordance.pm 2172 2005-11-02 03:32:51Z theory $
+# $Id: SemiAffordance.pm 2386 2005-12-14 04:34:32Z theory $
 
 =head1 NAME
 
@@ -201,7 +201,7 @@ be used in the set acccessor (mutator) to validate new attribute values.
 use strict;
 use Class::Meta;
 use base 'Class::Meta::AccessorBuilder::Affordance';
-our $VERSION = "0.50";
+our $VERSION = "0.51";
 
 sub build_attr_get {
     UNIVERSAL::can($_[0]->package, $_[0]->name);

@@ -1,6 +1,6 @@
 package Class::Meta;
 
-# $Id: Meta.pm 2289 2005-12-08 05:57:01Z theory $
+# $Id: Meta.pm 2404 2005-12-17 03:40:23Z theory $
 
 =head1 NAME
 
@@ -696,7 +696,7 @@ use Class::Meta::Method;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.50";
+our $VERSION = "0.51";
 
 ##############################################################################
 # Private Package Globals
@@ -1043,6 +1043,15 @@ user interface. Optional.
 The visibility of the method. See the description of the C<view> parameter to
 C<add_constructor> for a description of its value.
 
+=item code
+
+You can implicitly define the method in your class by passing a code reference
+via teh C<code> parameter. Once C<build()> is called,
+L<Kinetic::Meta::Method|Kinetic::Meta::Method> will install the method into
+the package for which the Class::Meta object was defined, and with the name
+specified via the C<name> parameter. This can make it easy to declare an
+entire class in a single Class::Meta declaration.
+
 =item context
 
 The context of the method. This indicates whether it's a class method or an
@@ -1051,9 +1060,11 @@ for a description of its value.
 
 =item caller
 
-A code reference that calls the method. Defaults to a code reference that
-calls a method with the name provided by the C<name> attribute on the class
-being defined.
+A code reference that calls the method. This code reference will be be used by
+the C<call()> method of L<Class::Meta::Method|Class::Meta::Method> to execute
+the method on behalf of an object. Defaults to a code reference that calls a
+method with the name provided by the C<name> attribute on the class being
+defined.
 
 =item args
 
