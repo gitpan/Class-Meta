@@ -1,6 +1,6 @@
 package Class::Meta::Constructor;
 
-# $Id: Constructor.pm 2386 2005-12-14 04:34:32Z theory $
+# $Id: Constructor.pm 2449 2005-12-30 00:07:53Z theory $
 
 =head1 NAME
 
@@ -39,7 +39,7 @@ use strict;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.51";
+our $VERSION = "0.52";
 
 ##############################################################################
 # Constructors                                                               #
@@ -286,7 +286,7 @@ sub build {
                     $attr->set($new, delete $p{$key});
                 } else {
                     # Use the default value.
-                    $new->{$key} = $attr->default;
+                    $new->{$key} = $attr->default unless exists $new->{$key};
                 }
             }
         }

@@ -1,6 +1,6 @@
 package Class::Meta::Types::Perl;
 
-# $Id: Perl.pm 2386 2005-12-14 04:34:32Z theory $
+# $Id: Perl.pm 2405 2005-12-17 03:41:09Z theory $
 
 =head1 NAME
 
@@ -78,7 +78,7 @@ A code reference. Also known as a closure. C<UNIVERSAL::isa()> must return
 
 use strict;
 use Class::Meta::Type;
-our $VERSION = "0.51";
+our $VERSION = "0.52";
 
 sub import {
     my ($pkg, $builder) = @_;

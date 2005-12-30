@@ -1,13 +1,13 @@
 #!/usr/bin/perl
 
-# $Id: ctor.t 682 2004-09-28 05:59:10Z theory $
+# $Id: ctor.t 2449 2005-12-30 00:07:53Z theory $
 
 ##############################################################################
 # Set up the tests.
 ##############################################################################
 
 use strict;
-use Test::More tests => 45;
+use Test::More tests => 53;
 
 ##############################################################################
 # Create a simple class.
@@ -157,3 +157,35 @@ isa_ok($ctor, 'Class::Meta::Constructor');
 is( $ctor->name, 'foo', "Check an attibute");
 is( $ctor->foo, 'bar', "Check added attibute");
 
+##############################################################################
+# Now try mixing the setting of attributes.
+package Try::Mixed::Constructor;
+use Class::Meta::Types::Perl;
+BEGIN { Test::More->import }
+
+ok $cm = Class::Meta->new, 'Create new Class::Meta object';
+ok $cm->add_constructor(name => 'new'), 'Add a constructor';
+ok $cm->add_attribute(
+    name => 'foo',
+    type => 'scalar',
+), 'Add "foo" attribute';
+
+ok $cm->add_attribute(
+    name   => 'bar',
+    type   => 'scalar',
+    create => Class::Meta::NONE,
+), 'Add "bar" attribute';
+
+sub bar {
+    my $self = shift;
+    return $self->{bar} unless @_;
+    $self->foo(shift);
+    $self->{bar} = 'set';
+}
+
+ok $cm->build, 'Build the new class';
+
+ok my $try = Try::Mixed::Constructor->new(bar => 'hey'),
+    'Construct an instance of the new class';
+is $try->bar, 'set', '"bar" should be "set"';
+is $try->foo, 'hey', '"foo" should be "hey"';
