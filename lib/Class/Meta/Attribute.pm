@@ -1,6 +1,6 @@
 package Class::Meta::Attribute;
 
-# $Id: Attribute.pm 2405 2005-12-17 03:41:09Z theory $
+# $Id: Attribute.pm 2878 2006-05-29 23:03:29Z theory $
 
 =head1 NAME
 
@@ -45,7 +45,20 @@ use strict;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.52";
+our $VERSION = "0.53";
+
+##############################################################################
+# Private Package Globals                                                    #
+##############################################################################
+my %type_pkg_for = (
+    map( { $_ => 'Boolean' } qw(bool boolean) ),
+    map( { $_ => 'Numeric' } qw(whole integer int decimal dec real float) ),
+    map(
+        { $_ => 'Perl' }
+        qw(scalar scalarref array arrayref hash hashref code coderef closure)
+    ),
+    string => 'String',
+);
 
 ##############################################################################
 # Constructors                                                               #
@@ -203,6 +216,14 @@ Returns the name of the attribute's data type. Typical values are "scalar",
 "string", and "boolean". See L<Class::Meta|Class::Meta/"Data Types"> for a
 complete list.
 
+=head3 is
+
+  if ($attr->is('string')) {
+      # ...
+  }
+
+A convenience methed for C<< $attr->type eq $type >>.
+
 =head3 desc
 
   my $desc = $attr->desc;
@@ -309,6 +330,7 @@ sub view     { $_[0]->{view}     }
 sub context  { $_[0]->{context}  }
 sub authz    { $_[0]->{authz}    }
 sub class    { $_[0]->{class}    }
+sub is       { $_[0]->{type} eq $_[1] }
 
 ##############################################################################
 
@@ -405,7 +427,16 @@ sub build {
 
     # Get the data type object, replace any alias, and assemble the
     # validation checks.
-    my $type = Class::Meta::Type->new($self->{type});
+    $self->{type} = delete $self->{is} if exists $self->{is};
+    my $type = eval { Class::Meta::Type->new($self->{type}) };
+    unless ($type) {
+        my $pkg = $type_pkg_for{ $self->{type} } or die $@;
+        eval "require Class::Meta::Types::$pkg";
+        die $@ if $@;
+        "Class::Meta::Types::$pkg"->import;
+        $type = Class::Meta::Type->new($self->{type});
+    }
+
     $self->{type} = $type->key;
     my $create = delete $self->{create};
     $type->build($class->{package}, $self, $create)
@@ -455,7 +486,7 @@ Other classes of interest within the Class::Meta distribution include:
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2002-2005, David Wheeler. All Rights Reserved.
+Copyright (c) 2002-2006, David Wheeler. All Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.

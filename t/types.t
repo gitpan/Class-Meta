@@ -1,13 +1,13 @@
 #!/usr/bin/perl -w
 
-# $Id: types.t 802 2004-10-28 23:21:10Z theory $
+# $Id: types.t 2875 2006-05-29 18:15:23Z theory $
 
 ##############################################################################
 # Set up the tests.
 ##############################################################################
 
 use strict;
-use Test::More tests => 58;
+use Test::More tests => 60;
 
 ##############################################################################
 # Create a simple class.
@@ -55,7 +55,7 @@ BEGIN {
               );
     $c->add_attribute( name  => 'age',
                   view   => Class::Meta::PUBLIC,
-                  type  => 'integer',
+                  is     => 'integer',
                   label => 'Age',
                   field => 'text',
                   desc  => "The person's age.",
@@ -65,6 +65,7 @@ BEGIN {
               );
     $c->add_attribute( name  => 'alive',
                   view   => Class::Meta::PUBLIC,
+                  type  => 'string',
                   type  => 'bool',
                   label => 'Living',
                   field => 'checkbox',
@@ -196,12 +197,17 @@ ok( $t->alive(1), 'alive on' );
 ok( $t->alive, 'alive true again');
 ok( my $alive = $class->attributes('alive'), "Get alive attribute object" );
 is( $alive->type, 'boolean', "Check that the alias was converted" );
+ok( $alive->is('boolean'), "Check that is('boolean') returns true" );
+ok( !$alive->is('string'), "Check that is('string') returns false" );
 
 # Test whole number.
-eval { $t->whole(0) };
-ok( $err = $@, 'whole to 0 croaks' );
-like( $err, qr/^Value '0' is not a valid whole number/,
-     'correct whole number exception' );
+SKIP: {
+    skip 'Whole numbers can now be 0', 2 if Data::Types->VERSION > 0.05;
+    eval { $t->whole(0) };
+    ok( $err = $@, 'whole to 0 croaks' );
+    like( $err, qr/^Value '0' is not a valid whole number/,
+          'correct whole number exception' );
+}
 ok( $t->whole(1), 'whole to 1.');
 
 # Test integer.

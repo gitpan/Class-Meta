@@ -1,6 +1,6 @@
 package Class::Meta::Class;
 
-# $Id: Class.pm 2405 2005-12-17 03:41:09Z theory $
+# $Id: Class.pm 2873 2006-05-28 20:03:44Z theory $
 
 =head1 NAME
 
@@ -60,7 +60,7 @@ use Class::Meta::Method;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.52";
+our $VERSION = "0.53";
 our @CARP_NOT = qw(Class::Meta);
 
 =head1 INTERFACE
@@ -427,7 +427,7 @@ Other classes of interest within the Class::Meta distribution include:
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2002-2005, David Wheeler. All Rights Reserved.
+Copyright (c) 2002-2006, David Wheeler. All Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.

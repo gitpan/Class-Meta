@@ -1,6 +1,6 @@
 package Class::Meta::Method;
 
-# $Id: Method.pm 2405 2005-12-17 03:41:09Z theory $
+# $Id: Method.pm 2873 2006-05-28 20:03:44Z theory $
 
 =head1 NAME
 
@@ -40,7 +40,7 @@ use strict;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.52";
+our $VERSION = "0.53";
 
 =head1 INTERFACE
 
@@ -125,7 +125,7 @@ sub new {
         my $ref = ref $p{code};
         $class->handle_error(
             'Parameter code must be a code reference'
-        ) unless $ref && $ref eq 'CODE'
+        ) unless $ref && $ref eq 'CODE';
     }
 
     # Create and cache the method object.
@@ -273,7 +273,7 @@ This is a protected method, designed to be called only by the Class::Meta
 class or a subclass of Class::Meta. It takes a single argument, the
 Class::Meta::Class object for the class in which the method was defined. Once
 it checks to make sure that it is only called by Class::Meta or a subclass of
-Class::Meta or of Class::Meta::Method, C<Cbuild()> installs the method if it
+Class::Meta or of Class::Meta::Method, C<build()> installs the method if it
 was specified via the C<code> parameter to C<new()>.
 
 Although you should never call this method directly, subclasses of
@@ -333,7 +333,7 @@ Other classes of interest within the Class::Meta distribution include:
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2002-2005, David Wheeler. All Rights Reserved.
+Copyright (c) 2002-2006, David Wheeler. All Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.

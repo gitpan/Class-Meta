@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: types_affordance.t 682 2004-09-28 05:59:10Z theory $
+# $Id: types_affordance.t 2872 2006-05-28 20:02:16Z theory $
 
 ##############################################################################
 # Set up the tests.
@@ -196,10 +196,13 @@ ok( $t->set_alive_on, 'set_alive_on' );
 ok( $t->is_alive, 'is_alive true again');
 
 # Test whole number.
-eval { $t->set_whole(0) };
-ok( $err = $@, 'set_whole to 0 croaks' );
-like( $err, qr/^Value '0' is not a valid whole number/,
-     'correct whole number exception' );
+SKIP: {
+    skip 'Whole numbers can now be 0', 2 if Data::Types->VERSION > 0.05;
+    eval { $t->set_whole(0) };
+    ok( $err = $@, 'set_whole to 0 croaks' );
+    like( $err, qr/^Value '0' is not a valid whole number/,
+          'correct whole number exception' );
+}
 ok( $t->set_whole(1), 'set_whole to 1.');
 
 # Test integer.

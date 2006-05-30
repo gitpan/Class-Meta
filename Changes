@@ -1,5 +1,20 @@
 Revision history for Perl extension Class::Meta.
 
+0.53  2006-05-30T00:54:52
+      - Added 'code' parameter to "new_constructor()" to install a constructor
+        written by the user. This essentially works just like the 'code'
+        method parameter.
+      - Fixed tests that fail with Data::Types 0.06 and later.
+      - Added 'is' parameter to the attribute constructor as an alias for
+        'type'. If both 'type and 'is' are passed to the attribute
+        constructor, 'is' will be used.
+      - Added the boolean method is() to the attribute class to compare a
+        type.
+      - Documented the 'create' parameter to "new_constructor()".
+      - Data types in defined in the Class::Meta::Types namespace are now
+        automatically loaded if they are used in an attribute and not
+        already loaded.
+
 0.52  2005-12-30T00:08:36
       - The constructor method created by Class::Meta::Constructor no longer
         assigns the default value to an attribute if that attribute has

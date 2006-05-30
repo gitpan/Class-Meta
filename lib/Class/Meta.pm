@@ -1,6 +1,6 @@
 package Class::Meta;
 
-# $Id: Meta.pm 2405 2005-12-17 03:41:09Z theory $
+# $Id: Meta.pm 2878 2006-05-29 23:03:29Z theory $
 
 =head1 NAME
 
@@ -17,30 +17,41 @@ Generate a class:
   use Class::Meta::Types::Numeric;
 
   BEGIN {
+
       # Create a Class::Meta object for this class.
       my $cm = Class::Meta->new( key => 'thingy' );
 
       # Add a constructor.
-      $cm->add_constructor( name   => 'new',
-                            create => 1 );
+      $cm->add_constructor(
+          name   => 'new',
+          create => 1,
+      );
 
       # Add a couple of attributes with generated methods.
-      $cm->add_attribute( name     => 'id',
-                          authz    => Class::Meta::READ,
-                          type     => 'integer',
-                          required => 1,
-                          default  => sub { Data::UUID->new->create_str } );
-      $cm->add_attribute( name     => 'name',
-                          type     => 'string',
-                          required => 1,
-                          default  => undef );
-      $cm->add_attribute( name     => 'age',
-                          type     => 'integer',
-                          default  => undef );
+      $cm->add_attribute(
+          name     => 'uuid',
+          authz    => Class::Meta::READ,
+          type     => 'string',
+          required => 1,
+          default  => sub { Data::UUID->new->create_str },
+      );
+      $cm->add_attribute(
+          name     => 'name',
+          is       => 'string',
+          required => 1,
+          default  => undef,
+      );
+      $cm->add_attribute(
+          name    => 'age',
+          is      => 'integer',
+          default => undef,
+      );
 
-      # Add a custom method.
-      $cm->add_method( name => 'chk_pass',
-                       view => Class::Meta::PUBLIC );
+     # Add a custom method.
+      $cm->add_method(
+          name => 'chk_pass',
+          view => Class::Meta::PUBLIC,
+      );
       $cm->build;
   }
 
@@ -135,16 +146,21 @@ class:
   use Class::Meta::Types::Perl;
 
   BEGIN {
+
       # Create a Class::Meta object for this class.
       my $cm = Class::Meta->new( key => 'dog' );
 
       # Add a constructor.
-      $cm->add_constructor( name   => 'new',
-                            create => 1 );
+      $cm->add_constructor(
+          name   => 'new',
+          create => 1,
+      );
 
       # Add an attribute.
-      $cm->add_attribute( name   => 'tail',
-                          type   => 'scalar' );
+      $cm->add_attribute(
+          name => 'tail',
+          type => 'scalar',
+      );
 
       # Add a custom method.
       $cm->add_method( name => 'wag' );
@@ -220,8 +236,9 @@ attribute without creating or loading the appropriate data type, you will
 get an error.
 
 But I didn't want to leave you out in the cold, so I created a whole bunch of
-data types to get you started. They can be loaded simply by creating the
-appropriate module. The modules are:
+data types to get you started. Any of these will automatically be loaded by
+Class::Meta if it is used to create an attribute. They can also be loaded
+simply by C<use>ing the appropriate module. The modules are:
 
 =over 4
 
@@ -696,7 +713,7 @@ use Class::Meta::Method;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.52";
+our $VERSION = "0.53";
 
 ##############################################################################
 # Private Package Globals
@@ -735,10 +752,8 @@ our $VERSION = "0.52";
         $error_handler->(@_);
     }
 
-    sub for_key { $keys{$_[1]} }
-
+    sub for_key { $keys{ $_[1] } }
     sub keys    { wantarray ? keys %keys : [keys %keys] }
-
     sub clear   { shift; @_ ? delete $keys{+shift} : undef %keys }
 
     sub new {
@@ -762,9 +777,9 @@ our $VERSION = "0.52";
         }
 
         # Check to make sure we haven't created this class already.
-        $p{error_handler}->("Class object for class '$p{package}' "
-                            . "already exists")
-          if $classes{$p{package}};
+        $p{error_handler}->(
+            "Class object for class '$p{package}' already exists"
+        ) if $classes{$p{package}};
 
         $p{class_class}       ||= 'Class::Meta::Class';
         $p{constructor_class} ||= 'Class::Meta::Constructor';
@@ -778,17 +793,18 @@ our $VERSION = "0.52";
         $classes{$p{package}}->_inherit( \%classes, 'attr');
 
         # Return!
-        return bless { package => $p{package} }, ref $pkg || $pkg;
+        return bless { package => $p{package} } => ref $pkg || $pkg;
     }
-
 
 ##############################################################################
 # add_constructor()
 
 =head3 add_constructor
 
-  $cm->add_constructor( name   => 'new',
-                        create => 1 );
+  $cm->add_constructor(
+      name   => 'construct',
+      create => 1,
+  );
 
 Creates and returns a Class::Meta::Constructor object that describes a
 constructor for the class. The supported parameters are:
@@ -798,7 +814,15 @@ constructor for the class. The supported parameters are:
 =item name
 
 The name of the constructor. The name must consist of only alphanumeric
-characters or "_".
+characters or "_". Required.
+
+=item create
+
+When true, Class::Meta::Constructor will automatically create and install a
+constructor named for the C<name> parameter. Defaults to true unless C<code>
+is passed. In general you won't need to specify this parameter unless you've
+written your own constructor in the package, in which case you'll want to
+specify C<< create => 0 >>.
 
 =item label
 
@@ -809,6 +833,16 @@ interface. Optional.
 
 A description of the constructor. Possibly useful for displaying help text in
 a user interface. Optional.
+
+=item code
+
+You can implicitly define the constructor in your class by passing a code
+reference via the C<code> parameter. Once C<build()> is called,
+L<Kinetic::Meta::Constructor|Kinetic::Meta::Constructor> will install the
+constructor into the package for which the Class::Meta object was defined, and
+with the name specified via the C<name> parameter. Note that if the
+constructor view is PRIVATE or PROTECTED, the constructor will be wrapped in
+extra code to envocde the view. Optional.
 
 =item view
 
@@ -860,23 +894,30 @@ being defined.
 
 =head3 add_attribute
 
-  $cm->add_attribute( name => 'tail',
-                      type => 'scalar' );
+  $cm->add_attribute(
+      name => 'tail',
+      type => 'scalar',
+  );
 
 Creates and returns a Class::Meta::Attribute object that describes an
 attribute of the class. The supported parameters are:
 
 =over 4
 
-=item type
-
-The data type of the attribute. See L</"Data Types"> for some possible values
-for this parameter. Required.
-
 =item name
 
 The name of the attribute. The name must consist of only alphanumeric
 characters or "_". Required.
+
+=item type
+
+=item is
+
+The data type of the attribute. See L</"Data Types"> for some possible values
+for this parameter. If the type name corresponds to a data type in a package
+in the Class::Meta::Types namespae, that package will automatically be loaded
+and configured with Perl-style accessors, so that the data type can simply be
+used. Required. If both C<type> and C<is> are passed, C<is> will be used.
 
 =item required
 
@@ -1046,11 +1087,10 @@ C<add_constructor> for a description of its value.
 =item code
 
 You can implicitly define the method in your class by passing a code reference
-via teh C<code> parameter. Once C<build()> is called,
+via the C<code> parameter. Once C<build()> is called,
 L<Kinetic::Meta::Method|Kinetic::Meta::Method> will install the method into
 the package for which the Class::Meta object was defined, and with the name
-specified via the C<name> parameter. This can make it easy to declare an
-entire class in a single Class::Meta declaration.
+specified via the C<name> parameter.
 
 =item context
 
@@ -1232,11 +1272,20 @@ An ambitious yet underdocumented module that also manages accessor and
 constructor generation, data validation, and provides a reflection API. It
 also supports serialization.
 
+=item L<Class::MOP|Class::MOP>
+
+Stevan Little's application of Perl 6 meta classes to Perl 5.
+
+=item L<Moose|Moose>
+
+"It's the new camel." Another extention of the Perl 5 object system, built on
+Class::MOP.
+
 =back
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2002-2005, David Wheeler. All Rights Reserved.
+Copyright (c) 2002-2006, David Wheeler. All Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.

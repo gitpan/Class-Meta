@@ -1,6 +1,6 @@
 package Class::Meta::Constructor;
 
-# $Id: Constructor.pm 2449 2005-12-30 00:07:53Z theory $
+# $Id: Constructor.pm 2877 2006-05-29 22:18:16Z theory $
 
 =head1 NAME
 
@@ -39,7 +39,7 @@ use strict;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = "0.52";
+our $VERSION = "0.53";
 
 ##############################################################################
 # Constructors                                                               #
@@ -103,8 +103,16 @@ sub new {
         $p{view} = Class::Meta::PUBLIC;
     }
 
-    # Check the creation constant.
-    $p{create} = 1 unless defined $p{create};
+    # Use passed code or create the constructor?
+    if ($p{code}) {
+        my $ref = ref $p{code};
+        $class->handle_error(
+            'Parameter code must be a code reference'
+        ) unless $ref && $ref eq 'CODE';
+        $p{create} = 0;
+    } else {
+        $p{create} = 1 unless exists $p{create};
+    }
 
     # Validate or create the method caller if necessary.
     if ($p{caller}) {
@@ -220,9 +228,9 @@ the call to C<call()> itself will not appear in a call stack trace.
 
 sub call {
     my $self = shift;
-    my $code = $self->{caller}
-      or $self->class->handle_error("Cannot call constructor '",
-                                    $self->name, "'");
+    my $code = $self->{caller} or $self->class->handle_error(
+        q{Cannot call constructor '}, $self->name, q{'}
+    );
     goto &$code;
 }
 
@@ -235,7 +243,9 @@ sub call {
 This is a protected method, designed to be called only by the Class::Meta
 class or a subclass of Class::Meta. It takes a single argument, the
 Class::Meta::Class object for the class in which the constructor was defined,
-and generates constructor methods for the Class::Meta::Constructor object.
+and generates constructor method for the Class::Meta::Constructor, either by
+installing the code reference passed in the C<code> parameter or by creating
+the constructor from scratch.
 
 Although you should never call this method directly, subclasses of
 Class::Meta::Constructor may need to override its behavior.
@@ -253,14 +263,14 @@ sub build {
       unless UNIVERSAL::isa($caller, 'Class::Meta')
         || UNIVERSAL::isa($caller, __PACKAGE__);
 
-    # Just bail if we're not creating the constructor.
-    return $self unless delete $self->{create};
+    # Just bail if we're not creating or installing the constructor.
+    return $self unless delete $self->{create} || $self->{code};
 
     # Build a construtor that takes a parameter list and assigns the
     # the values to the appropriate attributes.
     my $name = $self->name;
 
-    my $sub = sub {
+    my $sub = delete $self->{code} || sub {
         my $package = ref $_[0] ? ref shift : shift;
         my $class = $specs->{$package};
 
@@ -360,7 +370,7 @@ Other classes of interest within the Class::Meta distribution include:
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2002-2005, David Wheeler. All Rights Reserved.
+Copyright (c) 2002-2006, David Wheeler. All Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.

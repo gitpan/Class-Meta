@@ -1,6 +1,6 @@
 package Class::Meta::Types::Numeric;
 
-# $Id: Numeric.pm 2405 2005-12-17 03:41:09Z theory $
+# $Id: Numeric.pm 2878 2006-05-29 23:03:29Z theory $
 
 =head1 NAME
 
@@ -74,7 +74,7 @@ A floating point number.
 use strict;
 use Class::Meta::Type;
 use Data::Types ();
-our $VERSION = "0.52";
+our $VERSION = "0.53";
 
 # This code ref builds value checkers.
 my $mk_chk = sub {
@@ -93,7 +93,7 @@ my $mk_chk = sub {
 sub import {
     my ($pkg, $builder) = @_;
     $builder ||= 'default';
-    return if eval "Class::Meta::Type->new('whole')";
+    return if eval { Class::Meta::Type->new('whole') };
 
     Class::Meta::Type->add(
         key     => "whole",
@@ -186,7 +186,7 @@ Other data type modules:
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2002-2005, David Wheeler. All Rights Reserved.
+Copyright (c) 2002-2006, David Wheeler. All Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.

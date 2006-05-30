@@ -1,14 +1,13 @@
 #!perl -w
 
-# $Id: base.t 1889 2005-07-13 01:31:50Z curtis $
+# $Id: base.t 2878 2006-05-29 23:03:29Z theory $
 
 ##############################################################################
 # Set up the tests.
 ##############################################################################
 
 use strict;
-#use Test::More tests => 130;
-use Test::More 'no_plan';
+use Test::More tests => 132;
 
 ##############################################################################
 # Create a simple class.
@@ -19,8 +18,6 @@ use strict;
 
 BEGIN {
     main::use_ok('Class::Meta');
-    main::use_ok('Class::Meta::Types::Numeric');
-    main::use_ok('Class::Meta::Types::String');
 }
 
 BEGIN {

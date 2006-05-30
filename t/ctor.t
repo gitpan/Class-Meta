@@ -1,13 +1,13 @@
 #!/usr/bin/perl
 
-# $Id: ctor.t 2449 2005-12-30 00:07:53Z theory $
+# $Id: ctor.t 2872 2006-05-28 20:02:16Z theory $
 
 ##############################################################################
 # Set up the tests.
 ##############################################################################
 
 use strict;
-use Test::More tests => 53;
+use Test::More tests => 55;
 
 ##############################################################################
 # Create a simple class.
@@ -165,6 +165,14 @@ BEGIN { Test::More->import }
 
 ok $cm = Class::Meta->new, 'Create new Class::Meta object';
 ok $cm->add_constructor(name => 'new'), 'Add a constructor';
+# Now write our own constructor.
+ok(
+    $ctor = $cm->add_constructor(
+        name => 'implicit',
+        code => sub { ok 'Implicit constructor called' },
+    ), 'Implicitly write constructor'
+);
+
 ok $cm->add_attribute(
     name => 'foo',
     type => 'scalar',
@@ -189,3 +197,6 @@ ok my $try = Try::Mixed::Constructor->new(bar => 'hey'),
     'Construct an instance of the new class';
 is $try->bar, 'set', '"bar" should be "set"';
 is $try->foo, 'hey', '"foo" should be "hey"';
+
+# Call implicit constructor and its test.
+Try::Mixed::Constructor->implicit;
