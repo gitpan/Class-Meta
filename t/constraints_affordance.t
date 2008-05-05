@@ -1,6 +1,6 @@
 #!perl -w
 
-# $Id: constraints_affordance.t 682 2004-09-28 05:59:10Z theory $
+# $Id: constraints_affordance.t 682 2004-09-28 05:59:10Z david $
 
 ##############################################################################
 # Set up the tests.

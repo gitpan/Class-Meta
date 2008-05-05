@@ -1,5 +1,19 @@
 Revision history for Perl extension Class::Meta.
 
+0.55  2008-05-05T18:02:27
+      - Added the "configure_requires", and "recommends" parameters to
+        Build.PL.
+      - Updated the copyright.
+
+0.54  2006-11-13T17:05:05
+      - Documented the 'name' parameter to new().
+      - The 'name' attribute of classes now defaults to the key name with
+        underscores replaced with spaces and each word capitalized by the
+        ucfirst operator. So "foo" will become "Foo" and "contact_type" will
+        become "Contact Type".
+      - Added an example and brief discussion of Class::Meta::Express to the
+        docs. Suggested by Jonathan Swartz.
+
 0.53  2006-05-30T00:54:52
       - Added 'code' parameter to "new_constructor()" to install a constructor
         written by the user. This essentially works just like the 'code'

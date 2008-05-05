@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: types_affordance.t 2872 2006-05-28 20:02:16Z theory $
+# $Id: types_affordance.t 2872 2006-05-28 20:02:16Z david $
 
 ##############################################################################
 # Set up the tests.

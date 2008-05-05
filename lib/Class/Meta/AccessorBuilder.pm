@@ -1,6 +1,6 @@
 package Class::Meta::AccessorBuilder;
 
-# $Id: AccessorBuilder.pm 2873 2006-05-28 20:03:44Z theory $
+# $Id: AccessorBuilder.pm 3787 2008-05-05 17:58:15Z david $
 
 =head1 NAME
 
@@ -191,7 +191,7 @@ be used in the set acccessor (mutator) to validate new attribute values.
 
 use strict;
 use Class::Meta;
-our $VERSION = "0.53";
+our $VERSION = '0.55';
 
 sub build_attr_get {
     UNIVERSAL::can($_[0]->package, $_[0]->name);
@@ -418,7 +418,7 @@ generated accessors.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2002-2006, David Wheeler. All Rights Reserved.
+Copyright (c) 2002-2008, David Wheeler. Some Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.

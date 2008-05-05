@@ -1,6 +1,6 @@
 #!perl -w
 
-# $Id: view_semi_affordance.t 2384 2005-12-14 04:27:23Z theory $
+# $Id: view_semi_affordance.t 2384 2005-12-14 04:27:23Z david $
 
 ##############################################################################
 # Set up the tests.

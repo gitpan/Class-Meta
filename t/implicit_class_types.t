@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: implicit_class_types.t 1525 2005-04-13 21:14:20Z theory $
+# $Id: implicit_class_types.t 1525 2005-04-13 21:14:20Z david $
 
 ##############################################################################
 # Set up the tests.
