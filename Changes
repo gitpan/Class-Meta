@@ -1,5 +1,42 @@
 Revision history for Perl extension Class::Meta.
 
+0.60  2008-05-13T03:42:13
+      - Required constraints are now enforced by the constructor, as well as
+        the individual attributes themselves. Frankly, it was a bug that this
+        isn't the way it worked before, although at the time I thought it was
+        a feature. This is a backwards compatibility change, but see the next
+        point. Reported by Jon Swartz.
+      - Added support for an optional subroutine reference to be passed as the
+        final argument to constructors created by Class::Meta. The object
+        being constructed will be passed to the anonymous sub after all of the
+        specified and default values have been set, but before required
+        constraints are enforced. This allows developers to have a scope
+        within which to work before required attributes throw an exception.
+      - Added a link to the Subversion repository.
+      - Moved the "Justification" section of the documentation nearer to
+        the bottom. Suggested by Jon Swartz.
+      - The "view" parameter is now enforced for methods when the method body
+        is passed via the "code" parameter. Reported by Jon Swartz.
+      - Added the `trusted` method to Class::Meta::Class.
+      - You can now use strings to specify constant values when declaring
+        class attributes, methods, etc. The strings correspond to their
+        equivalent constant names, such as "PUBLIC", "PRIVATE", "GET", "SET",
+        "OBJECT", "CLASS", and so on. The corresponding constant value
+        will, however, be stored in the resulting Class::Meta object.
+      - A more useful exception is now thrown when an attribute is assed
+        with a missing or unknown type.
+      - Added the `default_type` parameter to `new()`, and the corresponding
+        attribute to Class::Meta::Class. This value will be used for the
+        data type of attributes created without a data type. Borrowed from
+        Class::Meta::Express.
+      - Many of the parameters to `Class::Meta->new` are now passed on to
+        suclasses if they are not explicitly specified by those subclasses.
+        This makes it easier to get the same settings (e.g., for Class::Meta
+        subclasses or for the default type) without typing the same things
+        over and over in subclasses.
+      - Added a spelling test. This has the benefit of reducing the number of
+        annoying spelling errors in the documentation.
+
 0.55  2008-05-05T18:02:27
       - Added the "configure_requires", and "recommends" parameters to
         Build.PL.

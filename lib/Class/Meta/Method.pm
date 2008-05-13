@@ -1,6 +1,6 @@
 package Class::Meta::Method;
 
-# $Id: Method.pm 3787 2008-05-05 17:58:15Z david $
+# $Id: Method.pm 3850 2008-05-08 02:52:18Z david $
 
 =head1 NAME
 
@@ -40,7 +40,7 @@ use strict;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = '0.55';
+our $VERSION = '0.60';
 
 =head1 INTERFACE
 
@@ -89,6 +89,7 @@ sub new {
 
     # Check the visibility.
     if (exists $p{view}) {
+        $p{view} = Class::Meta::_str_to_const($p{view});
         $class->handle_error("Not a valid view parameter: '$p{view}'")
           unless $p{view} == Class::Meta::PUBLIC
           ||     $p{view} == Class::Meta::PROTECTED
@@ -101,6 +102,7 @@ sub new {
 
     # Check the context.
     if (exists $p{context}) {
+        $p{context} = Class::Meta::_str_to_const($p{context});
         $class->handle_error("Not a valid context parameter: "
                                      . "'$p{context}'")
           unless $p{context} == Class::Meta::OBJECT
@@ -296,6 +298,38 @@ sub build {
     if (my $code = delete $self->{code}) {
         my $pack = $self->package;
         my $name = $self->{name};
+        if ($self->{view} < Class::Meta::PUBLIC ) {
+            # Add a constraint to the code ref.
+            my $real_meth = $code;
+            if ($self->{view} == Class::Meta::PROTECTED) {
+                $code = sub {
+                    $self->class->handle_error(
+                        "$name is a protected method of $pack"
+                    ) unless UNIVERSAL::isa(scalar caller, $pack);
+                    goto &$real_meth;
+                };
+            } elsif ($self->{view} == Class::Meta::PRIVATE) {
+                $code = sub {
+                    $self->class->handle_error(
+                        "$name is a private method of $pack"
+                    ) unless caller eq $pack;
+                    goto &$real_meth;
+                };
+            } elsif ($self->{view} == Class::Meta::TRUSTED) {
+                my $trusted = $self->class->trusted;
+                $code = sub {
+                    my $caller = caller;
+                    goto &$real_meth if $caller eq $pack;
+                    for my $pkg ( @{ $trusted } ) {
+                        goto &$real_meth if UNIVERSAL::isa($caller, $pkg);
+                    }
+                    $self->class->handle_error(
+                        "$name is a trusted method of $pack"
+                    );
+                };
+            }
+        }
+
         no strict 'refs';
         *{"$pack\::$name"} = $code;
     }
@@ -306,10 +340,14 @@ sub build {
 1;
 __END__
 
-=head1 BUGS
+=head1 SUPPORT
 
-Please send bug reports to <bug-class-meta@rt.cpan.org> or report them via the
-CPAN Request Tracker at L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Class-Meta>.
+This module is stored in an open repository at the following address:
+
+L<https://svn.kineticode.com/Class-Meta/trunk/>
+
+Patches against Class::Meta are welcome. Please send bug reports to
+<bug-class-meta@rt.cpan.org>.
 
 =head1 AUTHOR
 

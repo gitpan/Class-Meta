@@ -1,6 +1,6 @@
 package Class::Meta::Attribute;
 
-# $Id: Attribute.pm 3787 2008-05-05 17:58:15Z david $
+# $Id: Attribute.pm 3863 2008-05-09 19:13:03Z david $
 
 =head1 NAME
 
@@ -24,7 +24,7 @@ Class::Meta::Attribute - Class::Meta class attribute introspection
 =head1 DESCRIPTION
 
 An object of this class describes an attribute of a class created by
-Class::Meta. It includes metadata such as the name of the attribute, its data
+Class::Meta. It includes meta data such as the name of the attribute, its data
 type, its accessibility, and whether or not a value is required. It also
 provides methods to easily get and set the value of the attribute for a given
 instance of the class.
@@ -45,7 +45,7 @@ use strict;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = '0.55';
+our $VERSION = '0.60';
 
 ##############################################################################
 # Private Package Globals                                                    #
@@ -119,9 +119,10 @@ sub new {
 
     # Check the view.
     if (exists $p{view}) {
-        $class->handle_error("Not a valid view parameter: "
-                                     . "'$p{view}'")
-          unless $p{view} == Class::Meta::PUBLIC
+        $p{view} = Class::Meta::_str_to_const($p{view});
+        $class->handle_error(
+            "Not a valid view parameter: '$p{view}'"
+        ) unless $p{view} == Class::Meta::PUBLIC
           or     $p{view} == Class::Meta::PROTECTED
           or     $p{view} == Class::Meta::TRUSTED
           or     $p{view} == Class::Meta::PRIVATE;
@@ -132,9 +133,10 @@ sub new {
 
     # Check the authorization level.
     if (exists $p{authz}) {
-        $class->handle_error("Not a valid authz parameter: "
-                                     . "'$p{authz}'")
-          unless $p{authz} == Class::Meta::NONE
+        $p{authz} = Class::Meta::_str_to_const($p{authz});
+        $class->handle_error(
+            "Not a valid authz parameter: '$p{authz}'"
+        ) unless $p{authz} == Class::Meta::NONE
           or     $p{authz} == Class::Meta::READ
           or     $p{authz} == Class::Meta::WRITE
           or     $p{authz} == Class::Meta::RDWR;
@@ -145,9 +147,10 @@ sub new {
 
     # Check the creation constant.
     if (exists $p{create}) {
-        $class->handle_error("Not a valid create parameter: "
-                                     . "'$p{create}'")
-          unless $p{create} == Class::Meta::NONE
+        $p{create} = Class::Meta::_str_to_const($p{create});
+        $class->handle_error(
+            "Not a valid create parameter: '$p{create}'"
+        ) unless $p{create} == Class::Meta::NONE
           or     $p{create} == Class::Meta::GET
           or     $p{create} == Class::Meta::SET
           or     $p{create} == Class::Meta::GETSET;
@@ -158,13 +161,27 @@ sub new {
 
     # Check the context.
     if (exists $p{context}) {
-        $class->handle_error("Not a valid context parameter: "
-                                     . "'$p{context}'")
-          unless $p{context} == Class::Meta::OBJECT
+        $p{context} = Class::Meta::_str_to_const($p{context});
+        $class->handle_error(
+            "Not a valid context parameter: '$p{context}'"
+        ) unless $p{context} == Class::Meta::OBJECT
           or     $p{context} == Class::Meta::CLASS;
     } else {
         # Put it in object context by default.
         $p{context} = Class::Meta::OBJECT;
+    }
+
+    # Check the type.
+    $p{type} = delete $p{is} if exists $p{is};
+    $p{type} ||= $class->default_type;
+    $class->handle_error( "No type specified for the '$p{name}' attribute" )
+        unless $p{type};
+    unless ( eval { Class::Meta::Type->new($p{type}) } ) {
+        my $pkg = $type_pkg_for{ $p{type} }
+            or $class->handle_error( "Unknown type: '$p{type}'" );
+        eval "require Class::Meta::Types::$pkg";
+        $class->handle_error( "Unknown type: '$p{type}'" ) if $@;
+        "Class::Meta::Types::$pkg"->import;
     }
 
     # Check the default.
@@ -222,7 +239,7 @@ complete list.
       # ...
   }
 
-A convenience methed for C<< $attr->type eq $type >>.
+A convenience method for C<< $attr->type eq $type >>.
 
 =head3 desc
 
@@ -368,9 +385,9 @@ will not appear in a call stack trace.
 
 sub get {
     my $self = shift;
-    my $code = $self->{_get}
-      or $self->class->handle_error("Cannot get attribute '",
-                                    $self->name, "'");
+    my $code = $self->{_get} or $self->class->handle_error(
+        q{Cannot get attribute '}, $self->name, q{'}
+    );
     goto &$code;
 }
 
@@ -390,9 +407,9 @@ trace.
 
 sub set {
     my $self = shift;
-    my $code = $self->{_set}
-      or $self->class->handle_error("Cannot set attribute '",
-                                    $self->name, "'");
+    my $code = $self->{_set} or $self->class->handle_error(
+        q{Cannot set attribute '}, $self->name, q{'}
+    );
     goto &$code;
 }
 
@@ -420,27 +437,17 @@ sub build {
     # Check to make sure that only Class::Meta or a subclass is building
     # attribute accessors.
     my $caller = caller;
-    $self->class->handle_error("Package '$caller' cannot call " . ref($self)
-                               . "->build")
-      unless UNIVERSAL::isa($caller, 'Class::Meta')
-        || UNIVERSAL::isa($caller, __PACKAGE__);
+    $self->class->handle_error(
+        "Package '$caller' cannot call " . ref($self) . "->build"
+    ) unless UNIVERSAL::isa($caller, 'Class::Meta')
+          || UNIVERSAL::isa($caller, __PACKAGE__);
 
-    # Get the data type object, replace any alias, and assemble the
-    # validation checks.
-    $self->{type} = delete $self->{is} if exists $self->{is};
-    my $type = eval { Class::Meta::Type->new($self->{type}) };
-    unless ($type) {
-        my $pkg = $type_pkg_for{ $self->{type} } or die $@;
-        eval "require Class::Meta::Types::$pkg";
-        die $@ if $@;
-        "Class::Meta::Types::$pkg"->import;
-        $type = Class::Meta::Type->new($self->{type});
-    }
-
+    # Get the data type object and build any accessors.
+    my $type = Class::Meta::Type->new($self->{type});
     $self->{type} = $type->key;
     my $create = delete $self->{create};
     $type->build($class->{package}, $self, $create)
-      if $create != Class::Meta::NONE;
+        if $create != Class::Meta::NONE;
 
     # Create the attribute object get code reference.
     if ($self->{authz} >= Class::Meta::READ) {
@@ -457,10 +464,14 @@ sub build {
 1;
 __END__
 
-=head1 BUGS
+=head1 SUPPORT
 
-Please send bug reports to <bug-class-meta@rt.cpan.org> or report them via the
-CPAN Request Tracker at L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Class-Meta>.
+This module is stored in an open repository at the following address:
+
+L<https://svn.kineticode.com/Class-Meta/trunk/>
+
+Patches against Class::Meta are welcome. Please send bug reports to
+<bug-class-meta@rt.cpan.org>.
 
 =head1 AUTHOR
 

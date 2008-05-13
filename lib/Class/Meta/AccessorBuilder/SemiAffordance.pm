@@ -1,6 +1,6 @@
 package Class::Meta::AccessorBuilder::SemiAffordance;
 
-# $Id: SemiAffordance.pm 3787 2008-05-05 17:58:15Z david $
+# $Id: SemiAffordance.pm 3863 2008-05-09 19:13:03Z david $
 
 =head1 NAME
 
@@ -14,10 +14,12 @@ Class::Meta::AccessorBuilder::SemiAffordance - Semi-Affordance style accessor ge
   use Class::Meta::Type;
   use IO::Socket;
 
-  my $type = Class::Meta::Type->add( key     => 'io_socket',
-                                     builder => 'semi-affordance',
-                                     desc    => 'IO::Socket object',
-                                     name    => 'IO::Socket Object' );
+  my $type = Class::Meta::Type->add(
+      key     => 'io_socket',
+      builder => 'semi-affordance',
+      desc    => 'IO::Socket object',
+      name    => 'IO::Socket Object'
+  );
 
 =head1 DESCRIPTION
 
@@ -192,7 +194,7 @@ which determines what accessors, if any, are to be created.
 =item @checks
 
 A list of code references that validate the value of an attribute. These will
-be used in the set acccessor (mutator) to validate new attribute values.
+be used in the set accessor (mutator) to validate new attribute values.
 
 =back
 
@@ -201,7 +203,7 @@ be used in the set acccessor (mutator) to validate new attribute values.
 use strict;
 use Class::Meta;
 use base 'Class::Meta::AccessorBuilder::Affordance';
-our $VERSION = '0.55';
+our $VERSION = '0.60';
 
 sub build_attr_get {
     UNIVERSAL::can($_[0]->package, $_[0]->name);
@@ -218,10 +220,14 @@ sub build {
 1;
 __END__
 
-=head1 BUGS
+=head1 SUPPORT
 
-Please send bug reports to <bug-class-meta@rt.cpan.org> or report them via the
-CPAN Request Tracker at L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Class-Meta>.
+This module is stored in an open repository at the following address:
+
+L<https://svn.kineticode.com/Class-Meta/trunk/>
+
+Patches against Class::Meta are welcome. Please send bug reports to
+<bug-class-meta@rt.cpan.org>.
 
 =head1 AUTHOR
 

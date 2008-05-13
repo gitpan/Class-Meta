@@ -1,6 +1,6 @@
 package Class::Meta::AccessorBuilder::Affordance;
 
-# $Id: Affordance.pm 3787 2008-05-05 17:58:15Z david $
+# $Id: Affordance.pm 3863 2008-05-09 19:13:03Z david $
 
 =head1 NAME
 
@@ -14,10 +14,12 @@ Class::Meta::AccessorBuilder::Affordance - Affordance style accessor generation
   use Class::Meta::Type;
   use IO::Socket;
 
-  my $type = Class::Meta::Type->add( key     => 'io_socket',
-                                     builder => 'affordance',
-                                     desc    => 'IO::Socket object',
-                                     name    => 'IO::Socket Object' );
+  my $type = Class::Meta::Type->add(
+      key     => 'io_socket',
+      builder => 'affordance',
+      desc    => 'IO::Socket object',
+      name    => 'IO::Socket Object'
+  );
 
 =head1 DESCRIPTION
 
@@ -160,7 +162,7 @@ object passed to the code reference.
 =head3 build
 
   Class::Meta::AccessorBuilder::Affordance::build(
-    $pkg, $attribute, $create, @checks
+      $pkg, $attribute, $create, @checks
   );
 
 This method is called by the C<build()> method of Class::Meta::Type, and does
@@ -186,7 +188,7 @@ which determines what accessors, if any, are to be created.
 =item @checks
 
 A list of code references that validate the value of an attribute. These will
-be used in the set acccessor (mutator) to validate new attribute values.
+be used in the set accessor (mutator) to validate new attribute values.
 
 =back
 
@@ -194,7 +196,7 @@ be used in the set acccessor (mutator) to validate new attribute values.
 
 use strict;
 use Class::Meta;
-our $VERSION = '0.55';
+our $VERSION = '0.60';
 
 sub build_attr_get {
     UNIVERSAL::can($_[0]->package, 'get_' . $_[0]->name);
@@ -319,8 +321,7 @@ sub _build {
             };
         }
     } elsif ($attr->view == Class::Meta::TRUSTED) {
-        # XXX Should we have an accessor for this?
-        my $trusted = $attr->class->{trusted};
+        my $trusted = $attr->class->trusted;
         for ($get, $set) {
             my $real_sub = $_ or next;
             $_ = sub {
@@ -343,10 +344,14 @@ sub _build {
 1;
 __END__
 
-=head1 BUGS
+=head1 SUPPORT
 
-Please send bug reports to <bug-class-meta@rt.cpan.org> or report them via the
-CPAN Request Tracker at L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Class-Meta>.
+This module is stored in an open repository at the following address:
+
+L<https://svn.kineticode.com/Class-Meta/trunk/>
+
+Patches against Class::Meta are welcome. Please send bug reports to
+<bug-class-meta@rt.cpan.org>.
 
 =head1 AUTHOR
 

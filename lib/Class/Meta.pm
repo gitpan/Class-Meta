@@ -1,6 +1,6 @@
 package Class::Meta;
 
-# $Id: Meta.pm 3787 2008-05-05 17:58:15Z david $
+# $Id: Meta.pm 3863 2008-05-09 19:13:03Z david $
 
 =head1 NAME
 
@@ -17,7 +17,10 @@ Generate a class:
   BEGIN {
 
       # Create a Class::Meta object for this class.
-      my $cm = Class::Meta->new( key => 'thingy' );
+      my $cm = Class::Meta->new(
+          key          => 'thingy',
+          default_type => 'string',
+      );
 
       # Add a constructor.
       $cm->add_constructor(
@@ -28,15 +31,13 @@ Generate a class:
       # Add a couple of attributes with generated methods.
       $cm->add_attribute(
           name     => 'uuid',
-          authz    => Class::Meta::READ,
-          type     => 'string',
+          authz    => 'READ',
           required => 1,
           default  => sub { Data::UUID->new->create_str },
       );
       $cm->add_attribute(
           name     => 'name',
           is       => 'string',
-          required => 1,
           default  => undef,
       );
       $cm->add_attribute(
@@ -48,7 +49,7 @@ Generate a class:
      # Add a custom method.
       $cm->add_method(
           name => 'chk_pass',
-          view => Class::Meta::PUBLIC,
+          view => 'PUBLIC',
           code => sub { ... },
       );
   }
@@ -66,7 +67,7 @@ recommended!):
       meta thingy => ( default_type => 'string' );
       ctor 'new';
       has  uuid => (
-        authz    => Class::Meta::READ,
+        authz    => 'READ',
         required => 1,
         deafult  => sub { Data::UUID->new->create_str },
       );
@@ -79,7 +80,7 @@ Now isn't that nicer? Then use the class:
 
   use MyApp::Thingy;
 
-  my $thingy = MyApp::Thingy->new;
+  my $thingy = MyApp::Thingy->new( id => 19 );
   print "ID: ", $thingy->id, $/;
   $thingy->name('Larry');
   print "Name: ", $thingy->name, $/;
@@ -124,26 +125,6 @@ that it includes an introspection API that can be used as a unified interface
 for all Class::Meta-generated classes. In this sense, it is an implementation
 of the "Facade" design pattern.
 
-=head1 JUSTIFICATION
-
-One might argue that there are already too many class automation and parameter
-validation modules on CPAN. And one would be right. They range from simple
-accessor generators, such as L<Class::Accessor|Class::Accessor>, to simple
-parameter validators, such as L<Params::Validate|Params::Validate>, to more
-comprehensive systems, such as L<Class::Contract|Class::Contract> and
-L<Class::Tangram|Class::Tangram>. But, naturally, none of them could do
-exactly what I needed.
-
-What I needed was an implementation of the "Facade" design pattern. Okay, this
-isn't a facade like the GOF meant it, but it is in the respect that it
-creates classes with a common API so that objects of these classes can all be
-used identically, calling the same methods on each. This is done via the
-implementation of an introspection API. So the process of creating classes
-with Class::Meta not only creates attributes and accessors, but also creates
-objects that describe those classes. Using these descriptive objects, client
-applications can determine what to do with objects of Class::Meta-generated
-classes. This is particularly useful for user interface code.
-
 =head1 USAGE
 
 Before we get to the introspection API, let's take a look at how to create
@@ -153,12 +134,13 @@ you from any dependencies on the interfaces that such a base class might
 compel. For example, you can create whatever constructors you like, and name
 them whatever you like.
 
-I recommend that you use L<Class::Meta::Express|Class::Meta::Express> to
-declare your Class::Meta classes. It provides a much more pleasant class
-declaration experience than Class::Meta itself does. But since its functions
-support many of the same arguments as the declaration methods described here,
-it's worth it to skim the notes here, as well. Or if you're just a masochist
-and want to use the Class::Meta interface itself, well, read on!
+First of all, you really want to be using
+L<Class::Meta::Express|Class::Meta::Express> to declare your Class::Meta
+classes. It provides a much more pleasant class declaration experience than
+Class::Meta itself does. But since its functions support many of the same
+arguments as the declaration methods described here, it's worth it to skim the
+notes here, as well. Or if you're just a masochist and want to use the
+Class::Meta interface itself, well, read on!
 
 I recommend that you create your Class::Meta classes in a C<BEGIN> block.
 Although this is not strictly necessary, it helps to ensure that the classes
@@ -221,8 +203,8 @@ provided, the class name will be used, instead.
 =item *
 
 Next, we create a Class::Meta::Constructor object to describe a constructor
-method for the class. The C<create> parameter to the C<add_constructor()> method
-tells Class::Meta to create the constructor named "C<new()>".
+method for the class. The C<create> parameter to the C<add_constructor()>
+method tells Class::Meta to create the constructor named "C<new()>".
 
 =item *
 
@@ -618,8 +600,9 @@ tests, when you might need to do funky things with your classes.
   my $cm = Class::Meta->new( key => $key );
 
 Constructs and returns a new Class::Meta object that can then be used to
-define and build the complete interface of a class. The supported parameters
-are:
+define and build the complete interface of a class. Many of the supported
+parameters values will default to values specified for the most immediate
+Class::Meta-built parent class, if any. The supported parameters are:
 
 =over 4
 
@@ -647,6 +630,12 @@ abstract class, also known as a "virtual" class, is not intended to be used
 directly. No objects of an abstract class should every be created. Instead,
 classes that inherit from an abstract class must be implemented.
 
+=item default_type
+
+A data type to use for attributes added to the class with no explicit data
+type. See L</"Data Types"> for some possible values for this parameter.
+Inheritable from parent class.
+
 =item trust
 
 An array reference of key names or packages that are trusted by the class.
@@ -670,30 +659,31 @@ of that class rather than an array reference:
 
 The name of a class that inherits from Class::Meta::Class to be used to create
 all of the class objects for the class. Defaults to Class::Meta::Class.
+Inheritable from parent class.
 
 =item constructor_class
 
 The name of a class that inherits from Class::Meta::Constructor to be used to
 create all of the constructor objects for the class. Defaults to
-Class::Meta::Constructor.
+Class::Meta::Constructor. Inheritable from parent class.
 
 =item attribute_class
 
 The name of a class that inherits from Class::Meta::Attribute to be used to
 create all of the attribute objects for the class. Defaults to
-Class::Meta::Attribute.
+Class::Meta::Attribute. Inheritable from parent class.
 
 =item method_class
 
 The name of a class that inherits from Class::Meta::Method to be used to
 create all of the method objects for the class. Defaults to
-Class::Meta::Method.
+Class::Meta::Method. Inheritable from parent class.
 
 =item error_handler
 
 A code reference that will be used to handle errors thrown by the methods
-created for the new class. Defaults to the value returned by
-C<< Class::Meta->default_error_handler >>.
+created for the new class. Defaults to the value returned by C<<
+Class::Meta->default_error_handler >>. Inheritable from parent class.
 
 =back
 
@@ -704,6 +694,7 @@ C<< Class::Meta->default_error_handler >>.
 ##############################################################################
 use 5.006001;
 use strict;
+use Class::ISA ();
 
 ##############################################################################
 # Constants                                                                  #
@@ -735,6 +726,16 @@ use constant GETSET    => RDWR;
 use constant CLASS     => 0x01;
 use constant OBJECT    => 0x02;
 
+# Parameters passed on to subclasses.
+use constant INHERITABLE => qw(
+    class_class
+    error_handler
+    attribute_class
+    method_class
+    constructor_class
+    default_type
+);
+
 ##############################################################################
 # Dependencies that rely on the above constants                              #
 ##############################################################################
@@ -747,23 +748,25 @@ use Class::Meta::Method;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = '0.55';
+our $VERSION = '0.60';
 
 ##############################################################################
 # Private Package Globals
 ##############################################################################
-{
+CLASS: {
     my (%classes, %keys);
     my $error_handler = sub {
         require Carp;
-        our @CARP_NOT = qw(Class::Meta
-                           Class::Meta::Attribute
-                           Class::Meta::Constructor
-                           Class::Meta::Method
-                           Class::Meta::Type
-                           Class::Meta::Types::Numeric
-                           Class::Meta::Types::String
-                           Class::Meta::AccessorBuilder);
+        our @CARP_NOT = qw(
+            Class::Meta
+            Class::Meta::Attribute
+            Class::Meta::Constructor
+            Class::Meta::Method
+            Class::Meta::Type
+            Class::Meta::Types::Numeric
+            Class::Meta::Types::String
+            Class::Meta::AccessorBuilder
+        );
         # XXX Make sure Carp doesn't point to Class/Meta/Constructor.pm when
         # an exception is thrown by Class::Meta::AccessorBuilder. I have no
         # idea why this is necessary for AccessorBuilder but nowhere else!
@@ -794,13 +797,26 @@ our $VERSION = '0.55';
         my $pkg = shift;
 
         # Make sure we can get all the arguments.
-        $error_handler->("Odd number of parameters in call to new() when named "
-                         . "parameters were expected" ) if @_ % 2;
+        $error_handler->(
+            "Odd number of parameters in call to new() when named "
+            . "parameters were expected"
+        ) if @_ % 2;
         my %p = @_;
 
         # Class defaults to caller. Key defaults to class.
         $p{package} ||= caller;
         $p{key} ||= $p{package};
+
+        # Find any parent C::M class.
+        for my $super ( Class::ISA::super_path( $p{package} ) ) {
+            next unless $super->can('my_class');
+            # Copy attributes.
+            my $parent = $super->my_class;
+            for my $param (INHERITABLE) {
+                $p{$param} = $parent->{$param} unless exists $p{$param};
+            }
+            last;
+        }
 
         # Configure the error handler.
         if (exists $p{error_handler}) {
@@ -823,7 +839,7 @@ our $VERSION = '0.55';
         # Instantiate and cache Class object.
         $keys{$p{key}} = $classes{$p{package}} = $p{class_class}->new(\%p);
 
-        # Copy its parents' attributes and return.
+        # Copy its parents' attributes.
         $classes{$p{package}}->_inherit( \%classes, 'attr');
 
         # Return!
@@ -876,7 +892,7 @@ L<Kinetic::Meta::Constructor|Kinetic::Meta::Constructor> will install the
 constructor into the package for which the Class::Meta object was defined, and
 with the name specified via the C<name> parameter. Note that if the
 constructor view is PRIVATE or PROTECTED, the constructor will be wrapped in
-extra code to envocde the view. Optional.
+extra code to constrain the view. Optional.
 
 =item view
 
@@ -904,7 +920,11 @@ Can only be used by the declaring class or by classes that inherit from it.
 
 =back
 
-Defaults to Class::Meta::PUBLIC if not defined.
+Defaults to Class::Meta::PUBLIC if not defined. You can also use strings
+aliases to the above constants, although the constant values will actually be
+stored in the L<Class::Meta::Constructor|Class::Meta::Constructor> object,
+rather than the string. The supported strings are "PUBLIC", "PRIVATE",
+"TRUSTED", and "PROTECTED".
 
 =item caller
 
@@ -913,6 +933,37 @@ calls a method with the name provided by the C<name> attribute on the class
 being defined.
 
 =back
+
+If Class::Meta creates the constructor, it will be a simple parameter-list
+constructor, wherein attribute values can be passed as a list of
+attribute-name/value pairs, e.g.:
+
+  my $thingy = MyApp::Thingy->new(
+      name => 'Larry',
+      age  => 32,
+  );
+
+Required attributes must have a value passed to the constructor, with one
+exception: You can pass an optional subroutine reference as the last argument
+to the constructor. After all parameter values and default values have been
+set on the object, but before any exceptions are thrown for undefined required
+attributes, the constructor will execute this subroutine reference, passing in
+the object being constructed as the sole argument. So, for example, if C<name>
+is required but, for some reason, could not be set before constructing the
+object, you could set it like so:
+
+  my $thingy = MyApp::Thingy->new(
+      age  => 32,
+      sub {
+          my $thingy = shift;
+          # age and attributes with default values are already set.
+          my $name = calculate_name( $thingy );
+          $thingy->name($name);
+      },
+  );
+
+This allows developers to have a scope-limited context in which to work before
+required constraints are enforced.
 
 =cut
 
@@ -949,9 +1000,10 @@ characters or "_". Required.
 
 The data type of the attribute. See L</"Data Types"> for some possible values
 for this parameter. If the type name corresponds to a data type in a package
-in the Class::Meta::Types namespae, that package will automatically be loaded
-and configured with Perl-style accessors, so that the data type can simply be
-used. Required. If both C<type> and C<is> are passed, C<is> will be used.
+in the Class::Meta::Types name space, that package will automatically be
+loaded and configured with Perl-style accessors, so that the data type can
+simply be used. If both C<type> and C<is> are passed, C<is> will be used.
+Required unless the class was declared with a C<default_type>.
 
 =item required
 
@@ -996,7 +1048,10 @@ defined by the following constants:
 
 =back
 
-Defaults to Class::Meta::RDWR if not defined.
+Defaults to Class::Meta::RDWR if not defined. You can also use strings aliases
+to the above constants, although the constant values will actually be stored
+in the L<Class::Meta::Attribute|Class::Meta::Attribute> object, rather than
+the string. The supported strings are "READ", "WRITE", "RDWR", and "NONE".
 
 =item create
 
@@ -1023,6 +1078,11 @@ Create no accessors.
 
 =back
 
+You can also use strings aliases to the above constants, although the constant
+values will actually be stored in the
+L<Class::Meta::Attribute|Class::Meta::Attribute> object, rather than the
+string. The supported strings are "GET", "SET", "GETSET", and "NONE".
+
 If not unspecified, the value of the C<create> parameter will correspond to
 the value of the C<authz> parameter like so:
 
@@ -1039,10 +1099,12 @@ Class::Meta to do so. For example, if you were using standard Perl-style
 accessors, and needed to do something a little different by coding your own
 accessor, you'd specify it like this:
 
-  $cm->add_attribute( name   => $name,
-                      type   => $type,
-                      authz  => Class::Meta::RDWR,
-                      create => Class::Meta::NONE );
+  $cm->add_attribute(
+      name   => $name,
+      type   => $type,
+      authz  => Class::Meta::RDWR,
+      create => Class::Meta::NONE
+  );
 
 Just be sure that your custom accessor compiles before you call
 C<< $cm->build >> so that Class::Meta::Attribute can get a handle on it for
@@ -1061,6 +1123,11 @@ constants:
 =item Class::Meta::OBJECT
 
 =back
+
+You can also use strings aliases to the above constants, although the constant
+values will actually be stored in the
+L<Class::Meta::Attribute|Class::Meta::Attribute> object, rather than the
+string. The supported strings are "CLASS", and "OBJECT".
 
 =item default
 
@@ -1116,7 +1183,9 @@ user interface. Optional.
 =item view
 
 The visibility of the method. See the description of the C<view> parameter to
-C<add_constructor> for a description of its value.
+C<add_constructor> for a description of its value. Class::Meta only enforces
+the C<view> if the C<code> parameter is used to define the method body.
+Otherwise, it's up to the class implementation itself to do the job.
 
 =item code
 
@@ -1124,7 +1193,8 @@ You can implicitly define the method in your class by passing a code reference
 via the C<code> parameter. Once C<build()> is called,
 L<Kinetic::Meta::Method|Kinetic::Meta::Method> will install the method into
 the package for which the Class::Meta object was defined, and with the name
-specified via the C<name> parameter.
+specified via the C<name> parameter. If the C<view> is anything other than
+PUBLIC, it will be enforced.
 
 =item context
 
@@ -1223,8 +1293,36 @@ C<my_class()> class method, and all requisite constructors and accessors.
     }
 }
 
+# Trusted function to convert strings to their constant values.
+sub _str_to_const {
+    my $val = shift;
+    return $val if !$val || $val !~ /\w/;
+    my $view = eval "Class::Meta::\U$val" or return $val;
+    return $view;
+}
+
 1;
 __END__
+
+=head1 JUSTIFICATION
+
+One might argue that there are already too many class automation and parameter
+validation modules on CPAN. And one would be right. They range from simple
+accessor generators, such as L<Class::Accessor|Class::Accessor>, to simple
+parameter validators, such as L<Params::Validate|Params::Validate>, to more
+comprehensive systems, such as L<Class::Contract|Class::Contract> and
+L<Class::Tangram|Class::Tangram>. But, naturally, none of them could do
+exactly what I needed.
+
+What I needed was an implementation of the "Facade" design pattern. Okay, this
+isn't a facade like the "Gang of Four" meant it, but it is in the respect that
+it creates classes with a common API so that objects of these classes can all
+be used identically, calling the same methods on each. This is done via the
+implementation of an introspection API. So the process of creating classes
+with Class::Meta not only creates attributes and accessors, but also creates
+objects that describe those classes. Using these descriptive objects, client
+applications can determine what to do with objects of Class::Meta-generated
+classes. This is particularly useful for user interface code.
 
 =head1 TO DO
 
@@ -1250,10 +1348,14 @@ may not be easy.
 
 =back
 
-=head1 BUGS
+=head1 SUPPORT
 
-Please send bug reports to <bug-class-meta@rt.cpan.org> or report them via the
-CPAN Request Tracker at L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Class-Meta>.
+This module is stored in an open repository at the following address:
+
+L<https://svn.kineticode.com/Class-Meta/trunk/>
+
+Patches against Class::Meta are welcome. Please send bug reports to
+<bug-class-meta@rt.cpan.org>.
 
 =head1 AUTHOR
 
@@ -1311,7 +1413,7 @@ Accessor automation and data validation for Tangram applications.
 
 =item L<Class::Maker|Class::Maker>
 
-An ambitious yet underdocumented module that also manages accessor and
+An ambitious yet under-documented module that also manages accessor and
 constructor generation, data validation, and provides a reflection API. It
 also supports serialization.
 
@@ -1321,7 +1423,7 @@ Stevan Little's application of Perl 6 meta classes to Perl 5.
 
 =item L<Moose|Moose>
 
-"It's the new camel." Another extention of the Perl 5 object system, built on
+"It's the new camel." Another extension of the Perl 5 object system, built on
 Class::MOP.
 
 =back

@@ -1,6 +1,6 @@
 package Class::Meta::Class;
 
-# $Id: Class.pm 3787 2008-05-05 17:58:15Z david $
+# $Id: Class.pm 3863 2008-05-09 19:13:03Z david $
 
 =head1 NAME
 
@@ -33,7 +33,7 @@ Class::Meta::Class - Class::Meta class introspection
 
 Object of this class describe classes created by Class::Meta. They contain
 everything you need to know about a class to be able to put objects of that
-class to good use. In addition to retrieving metadata about the class itself,
+class to good use. In addition to retrieving meta data about the class itself,
 you can retrieve objects that describe the constructors, attributes, and
 methods of the class. See C<Class::Meta|Class::Meta> for a fuller description
 of the utility of the Class::Meta suite of modules.
@@ -60,7 +60,7 @@ use Class::Meta::Method;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = '0.55';
+our $VERSION = '0.60';
 our @CARP_NOT = qw(Class::Meta);
 
 =head1 INTERFACE
@@ -72,7 +72,7 @@ our @CARP_NOT = qw(Class::Meta);
 A protected method for constructing a Class::Meta::Class object. Do not call
 this method directly; Call the L<C<new()>|Class::Meta/new"> constructor on a
 Class::Meta object, instead. A Class::Meta::Class object will be constructed
-by default, and can always be retreived via the C<my_class()> method of the
+by default, and can always be retrieved via the C<my_class()> method of the
 class for which it was constructed.
 
 =cut
@@ -141,6 +141,21 @@ Returns a description of the class.
 
 Returns true if the class is an abstract class, and false if it is not.
 
+=head3 default_type
+
+  my $default_type = $class->default_type;
+
+The data type used for attributes of the class that were added with no
+explicit types.
+
+=head3 trusted
+
+  my @trusted = $class->trusted;
+  my $trusted = $class->trusted;
+
+In an array context, returns a list of class names that this class trusts.
+Returns the same list in an array reference in a scalar context.
+
 =cut
 
 sub package  { $_[0]->{package}  }
@@ -148,6 +163,8 @@ sub key      { $_[0]->{key}      }
 sub name     { $_[0]->{name}     }
 sub desc     { $_[0]->{desc}     }
 sub abstract { $_[0]->{abstract} }
+sub default_type { $_[0]->{default_type} }
+sub trusted  { wantarray ? @{ $_[0]->{trusted} } : [ @{ $_[0]->{trusted} } ] }
 
 ##############################################################################
 
@@ -400,10 +417,14 @@ sub _trusted {
 1;
 __END__
 
-=head1 BUGS
+=head1 SUPPORT
 
-Please send bug reports to <bug-class-meta@rt.cpan.org> or report them via the
-CPAN Request Tracker at L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Class-Meta>.
+This module is stored in an open repository at the following address:
+
+L<https://svn.kineticode.com/Class-Meta/trunk/>
+
+Patches against Class::Meta are welcome. Please send bug reports to
+<bug-class-meta@rt.cpan.org>.
 
 =head1 AUTHOR
 
