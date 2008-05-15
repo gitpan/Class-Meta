@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# $Id: meth.t 3850 2008-05-08 02:52:18Z david $
+# $Id: meth.t 3890 2008-05-15 03:10:11Z david $
 
 ##############################################################################
 # Set up the tests.
@@ -288,7 +288,10 @@ sub chk {
     # Check its message.
     like( $err, $qr, "Correct error" );
     # Make sure it refers to this file.
-    like( $err, qr/(?:at\s+\Q$fn\E|\Q$fn\E\s+at)\s+line/, 'Correct context' );
-    # Make sure it doesn't refer to other Class::Meta files.
-    unlike( $err, qr|lib/Class/Meta|, 'Not incorrect context')
+    SKIP: {
+        skip 'Older Carp lacks @CARP_NOT support', 2 unless $] >= 5.008;
+        like( $err, qr/(?:at\s+\Q$fn\E|\Q$fn\E\s+at)\s+line/, 'Correct context' );
+        # Make sure it doesn't refer to other Class::Meta files.
+        unlike( $err, qr|lib/Class/Meta|, 'Not incorrect context')
+    }
 }

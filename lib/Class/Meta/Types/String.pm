@@ -1,6 +1,6 @@
 package Class::Meta::Types::String;
 
-# $Id: String.pm 3838 2008-05-07 17:55:18Z david $
+# $Id: String.pm 3879 2008-05-13 03:39:45Z david $
 
 =head1 NAME
 
@@ -39,7 +39,7 @@ creating data types.
 
 use strict;
 use Class::Meta::Type;
-our $VERSION = '0.60';
+our $VERSION = '0.61';
 
 sub import {
     my ($pkg, $builder) = @_;
