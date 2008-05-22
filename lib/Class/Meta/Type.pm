@@ -1,6 +1,6 @@
 package Class::Meta::Type;
 
-# $Id: Type.pm 3879 2008-05-13 03:39:45Z david $
+# $Id: Type.pm 3914 2008-05-15 06:11:27Z david $
 
 =head1 NAME
 
@@ -44,7 +44,7 @@ use strict;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = '0.61';
+our $VERSION = '0.62';
 
 ##############################################################################
 # Private Package Globals                                                    #
@@ -154,8 +154,8 @@ types.
 
     sub new {
         my $class = shift;
-        my $key = lc shift
-          || Class::Meta->handle_error("Type argument required");
+        Class::Meta->handle_error('Type argument required') unless $_[0];
+        my $key = lc shift;
         unless (exists $types{$key}) {
             # See if there's a Class::Meta class defined for this key.
             my $cmc = Class::Meta->for_key($key)
