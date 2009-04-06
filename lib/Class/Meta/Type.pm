@@ -1,6 +1,6 @@
 package Class::Meta::Type;
 
-# $Id: Type.pm 3914 2008-05-15 06:11:27Z david $
+# $Id: Type.pm 3948 2008-05-23 21:09:56Z david $
 
 =head1 NAME
 
@@ -44,7 +44,7 @@ use strict;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = '0.62';
+our $VERSION = '0.63';
 
 ##############################################################################
 # Private Package Globals                                                    #
@@ -669,7 +669,7 @@ Class::Meta also allows you to craft your own accessors. Perhaps you'd prefer
 to use a StudlyCaps affordance accessor standard. In that case, you'll need to
 create your own module that builds accessors. I recommend that you study
 L<Class::Meta::AccessorBuilder|Class::Meta::AccessorBuilder> and
-LClass::Meta::AccessorBuilder::Affordance|Class::Meta::AccessorBuilder::Affordance>
+L<Class::Meta::AccessorBuilder::Affordance|Class::Meta::AccessorBuilder::Affordance>
 before taking on creating your own.
 
 Custom accessor building modules must have three functions.

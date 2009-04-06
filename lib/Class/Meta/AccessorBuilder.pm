@@ -1,6 +1,6 @@
 package Class::Meta::AccessorBuilder;
 
-# $Id: AccessorBuilder.pm 3893 2008-05-15 03:12:02Z david $
+# $Id: AccessorBuilder.pm 3937 2008-05-22 03:04:22Z david $
 
 =head1 NAME
 
@@ -193,7 +193,7 @@ be used in the set accessor (mutator) to validate new attribute values.
 
 use strict;
 use Class::Meta;
-our $VERSION = '0.62';
+our $VERSION = '0.63';
 
 sub build_attr_get {
     UNIVERSAL::can($_[0]->package, $_[0]->name);
