@@ -1,7 +1,5 @@
 #!/usr/bin/perl -w
 
-# $Id: class.t 3853 2008-05-08 06:58:16Z david $
-
 use strict;
 use Test::More tests => 16;
 BEGIN { use_ok( 'Class::Meta') }

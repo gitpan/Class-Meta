@@ -1,7 +1,5 @@
 package Class::Meta::Types::Boolean;
 
-# $Id: Boolean.pm 3937 2008-05-22 03:04:22Z david $
-
 =head1 NAME
 
 Class::Meta::Types::Boolean - Boolean data types
@@ -70,7 +68,7 @@ without the overhead of validation checks.
 
 use strict;
 use Class::Meta::Type;
-our $VERSION = '0.63';
+our $VERSION = '0.64';
 
 sub import {
     my ($pkg, $builder) = @_;
@@ -155,16 +153,20 @@ __END__
 
 =head1 SUPPORT
 
-This module is stored in an open repository at the following address:
+This module is stored in an open L<GitHub
+repository|http://github.com/theory/class-meta/>. Feel free to fork and
+contribute!
 
-L<https://svn.kineticode.com/Class-Meta/trunk/>
+Please file bug reports via L<GitHub
+Issues|http://github.com/theory/class-meta/issues/> or by sending mail to
+L<bug-Class-Meta.cpan.org|mailto:bug-Class-Meta.cpan.org>.
 
 Patches against Class::Meta are welcome. Please send bug reports to
 <bug-class-meta@rt.cpan.org>.
 
 =head1 AUTHOR
 
-David Wheeler <david@kineticode.com>
+David E. Wheeler <david@justatheory.com>
 
 =head1 SEE ALSO
 
@@ -202,7 +204,7 @@ Other data type modules:
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2002-2008, David Wheeler. Some Rights Reserved.
+Copyright (c) 2002-2011, David E. Wheeler. Some Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.

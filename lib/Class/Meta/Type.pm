@@ -1,7 +1,5 @@
 package Class::Meta::Type;
 
-# $Id: Type.pm 3948 2008-05-23 21:09:56Z david $
-
 =head1 NAME
 
 Class::Meta::Type - Data type validation and accessor building.
@@ -44,7 +42,7 @@ use strict;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = '0.63';
+our $VERSION = '0.64';
 
 ##############################################################################
 # Private Package Globals                                                    #
@@ -731,16 +729,20 @@ before creating your own.
 
 =head1 SUPPORT
 
-This module is stored in an open repository at the following address:
+This module is stored in an open L<GitHub
+repository|http://github.com/theory/class-meta/>. Feel free to fork and
+contribute!
 
-L<https://svn.kineticode.com/Class-Meta/trunk/>
+Please file bug reports via L<GitHub
+Issues|http://github.com/theory/class-meta/issues/> or by sending mail to
+L<bug-Class-Meta.cpan.org|mailto:bug-Class-Meta.cpan.org>.
 
 Patches against Class::Meta are welcome. Please send bug reports to
 <bug-class-meta@rt.cpan.org>.
 
 =head1 AUTHOR
 
-David Wheeler <david@kineticode.com>
+David E. Wheeler <david@justatheory.com>
 
 =head1 SEE ALSO
 
@@ -795,7 +797,7 @@ explicit set accessor.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2002-2008, David Wheeler. Some Rights Reserved.
+Copyright (c) 2002-2011, David E. Wheeler. Some Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.

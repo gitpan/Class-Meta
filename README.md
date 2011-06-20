@@ -1,4 +1,4 @@
-Class/Meta version 0.63
+Class/Meta version 0.64
 =======================
 
 Class::Meta provides an interface for automating the creation of Perl classes
@@ -7,7 +7,8 @@ that it includes an introspection API that can be used as a unified interface
 for all Class::Meta-generated classes. In this sense, it is an implementation
 of the "Facade" design pattern.
 
-JUSTIFICATION
+Justification
+-------------
 
 One might argue that there are already too many class automation and parameter
 validation modules on CPAN. And one would be right. They range from simple
@@ -26,36 +27,39 @@ objects that describe those classes. Using these descriptive objects, client
 applications can determine what to do with objects of Class::Meta-generated
 classes. This is particularly useful for user interface code.
 
-INSTALLATION
+Installation
+------------
 
 To install this module, type the following:
 
-   perl Build.PL
-   ./Build
-   ./Build test
-   ./Build install
+    perl Build.PL
+    ./Build
+    ./Build test
+    ./Build install
 
 Or, if you don't have Module::Build installed, type the following:
 
-   perl Makefile.PL
-   make
-   make test
-   make install
+    perl Makefile.PL
+    make
+    make test
+    make install
 
-DEPENDENCIES
+Dependencies
+------------
 
 This module requires these other modules and libraries:
 
-  Data::Types 0.05 or later
-  Class::ISA 0.35 or later
+* Data::Types 0.05 or later
+* Class::ISA 0.35 or later
 
 The test suite requires:
 
-  Test::Simple 0.17 or later
+( Test::Simple 0.17 or later
 
-COPYRIGHT AND LICENCE
+Copyright and Licence
+---------------------
 
-Copyright (c) 2002-2008, David Wheeler. Some Rights Reserved.
+Copyright (c) 2002-2011, David E. Wheeler. Some Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.

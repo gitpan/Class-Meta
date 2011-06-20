@@ -15,8 +15,9 @@ lib/Class/Meta/Types/Perl.pm
 lib/Class/Meta/Types/String.pm
 Makefile.PL
 MANIFEST			This list of files
+META.json
 META.yml
-README
+README.md
 t/attr.t
 t/base.t
 t/chk_types.t
