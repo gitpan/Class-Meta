@@ -43,7 +43,7 @@ use strict;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = '0.64';
+our $VERSION = '0.65';
 
 ##############################################################################
 # Private Package Globals                                                    #
@@ -471,9 +471,6 @@ contribute!
 Please file bug reports via L<GitHub
 Issues|http://github.com/theory/class-meta/issues/> or by sending mail to
 L<bug-Class-Meta.cpan.org|mailto:bug-Class-Meta.cpan.org>.
-
-Patches against Class::Meta are welcome. Please send bug reports to
-<bug-class-meta@rt.cpan.org>.
 
 =head1 AUTHOR
 

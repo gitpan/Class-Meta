@@ -37,7 +37,7 @@ creating data types.
 
 use strict;
 use Class::Meta::Type;
-our $VERSION = '0.64';
+our $VERSION = '0.65';
 
 sub import {
     my ($pkg, $builder) = @_;
@@ -68,9 +68,6 @@ contribute!
 Please file bug reports via L<GitHub
 Issues|http://github.com/theory/class-meta/issues/> or by sending mail to
 L<bug-Class-Meta.cpan.org|mailto:bug-Class-Meta.cpan.org>.
-
-Patches against Class::Meta are welcome. Please send bug reports to
-<bug-class-meta@rt.cpan.org>.
 
 =head1 AUTHOR
 
