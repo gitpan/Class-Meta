@@ -191,7 +191,7 @@ be used in the set accessor (mutator) to validate new attribute values.
 
 use strict;
 use Class::Meta;
-our $VERSION = '0.65';
+our $VERSION = '0.66';
 
 sub build_attr_get {
     UNIVERSAL::can($_[0]->package, $_[0]->name);
@@ -384,7 +384,7 @@ contribute!
 
 Please file bug reports via L<GitHub
 Issues|http://github.com/theory/class-meta/issues/> or by sending mail to
-L<bug-Class-Meta.cpan.org|mailto:bug-Class-Meta.cpan.org>.
+L<bug-Class-Meta@rt.cpan.org|mailto:bug-Class-Meta@rt.cpan.org>.
 
 =head1 AUTHOR
 

@@ -72,7 +72,7 @@ A floating point number.
 use strict;
 use Class::Meta::Type;
 use Data::Types ();
-our $VERSION = '0.65';
+our $VERSION = '0.66';
 
 # This code ref builds value checkers.
 my $mk_chk = sub {
@@ -147,7 +147,7 @@ contribute!
 
 Please file bug reports via L<GitHub
 Issues|http://github.com/theory/class-meta/issues/> or by sending mail to
-L<bug-Class-Meta.cpan.org|mailto:bug-Class-Meta.cpan.org>.
+L<bug-Class-Meta@rt.cpan.org|mailto:bug-Class-Meta@rt.cpan.org>.
 
 =head1 AUTHOR
 

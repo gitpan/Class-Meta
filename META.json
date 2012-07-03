@@ -4,7 +4,7 @@
       "David E. Wheeler <david@justatheory.com>"
    ],
    "dynamic_config" : 1,
-   "generated_by" : "Module::Build version 0.38, CPAN::Meta::Converter version 2.110440",
+   "generated_by" : "Module::Build version 0.4, CPAN::Meta::Converter version 2.120630",
    "license" : [
       "perl_5"
    ],
@@ -38,55 +38,55 @@
    "provides" : {
       "Class::Meta" : {
          "file" : "lib/Class/Meta.pm",
-         "version" : "0.65"
+         "version" : "0.66"
       },
       "Class::Meta::AccessorBuilder" : {
          "file" : "lib/Class/Meta/AccessorBuilder.pm",
-         "version" : "0.65"
+         "version" : "0.66"
       },
       "Class::Meta::AccessorBuilder::Affordance" : {
          "file" : "lib/Class/Meta/AccessorBuilder/Affordance.pm",
-         "version" : "0.65"
+         "version" : "0.66"
       },
       "Class::Meta::AccessorBuilder::SemiAffordance" : {
          "file" : "lib/Class/Meta/AccessorBuilder/SemiAffordance.pm",
-         "version" : "0.65"
+         "version" : "0.66"
       },
       "Class::Meta::Attribute" : {
          "file" : "lib/Class/Meta/Attribute.pm",
-         "version" : "0.65"
+         "version" : "0.66"
       },
       "Class::Meta::Class" : {
          "file" : "lib/Class/Meta/Class.pm",
-         "version" : "0.65"
+         "version" : "0.66"
       },
       "Class::Meta::Constructor" : {
          "file" : "lib/Class/Meta/Constructor.pm",
-         "version" : "0.65"
+         "version" : "0.66"
       },
       "Class::Meta::Method" : {
          "file" : "lib/Class/Meta/Method.pm",
-         "version" : "0.65"
+         "version" : "0.66"
       },
       "Class::Meta::Type" : {
          "file" : "lib/Class/Meta/Type.pm",
-         "version" : "0.65"
+         "version" : "0.66"
       },
       "Class::Meta::Types::Boolean" : {
          "file" : "lib/Class/Meta/Types/Boolean.pm",
-         "version" : "0.65"
+         "version" : "0.66"
       },
       "Class::Meta::Types::Numeric" : {
          "file" : "lib/Class/Meta/Types/Numeric.pm",
-         "version" : "0.65"
+         "version" : "0.66"
       },
       "Class::Meta::Types::Perl" : {
          "file" : "lib/Class/Meta/Types/Perl.pm",
-         "version" : "0.65"
+         "version" : "0.66"
       },
       "Class::Meta::Types::String" : {
          "file" : "lib/Class/Meta/Types/String.pm",
-         "version" : "0.65"
+         "version" : "0.66"
       }
    },
    "release_status" : "stable",
@@ -102,5 +102,5 @@
          "url" : "http://github.com/theory/class-meta/"
       }
    },
-   "version" : "0.65"
+   "version" : "0.66"
 }

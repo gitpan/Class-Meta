@@ -44,12 +44,14 @@ Generate a class:
           default => undef,
       );
 
-     # Add a custom method.
+      # Add a custom method.
       $cm->add_method(
           name => 'chk_pass',
           view => 'PUBLIC',
           code => sub { ... },
       );
+
+      $cm->build;
   }
 
   sub chck_pass { ... }
@@ -67,10 +69,10 @@ recommended!):
       has  uuid => (
         authz    => 'READ',
         required => 1,
-        deafult  => sub { Data::UUID->new->create_str },
+        deafault => sub { Data::UUID->new->create_str },
       );
-      has name => ( rquired => 1         );
-      has age  => ( is      => 'integer' );
+      has name => ( required => 1         );
+      has age  => ( is       => 'integer' );
       method chk_pass => sub { ... }
   };
 
@@ -141,7 +143,7 @@ notes here, as well. Or if you're just a masochist and want to use the
 Class::Meta interface itself, well, read on!
 
 I recommend that you create your Class::Meta classes in a C<BEGIN> block.
-Although this is not strictly necessary, it helps to ensure that the classes
+Although this is not strictly necessary, it helps ensure that the classes
 you're building are completely constructed and ready to go by the time
 compilation has completed. Creating classes with Class::Meta is easy, using
 the Class::Meta object oriented interface. Here is an example of a very simple
@@ -746,7 +748,7 @@ use Class::Meta::Method;
 ##############################################################################
 # Package Globals                                                            #
 ##############################################################################
-our $VERSION = '0.65';
+our $VERSION = '0.66';
 
 ##############################################################################
 # Private Package Globals
@@ -1354,7 +1356,7 @@ contribute!
 
 Please file bug reports via L<GitHub
 Issues|http://github.com/theory/class-meta/issues/> or by sending mail to
-L<bug-Class-Meta.cpan.org|mailto:bug-Class-Meta.cpan.org>.
+L<bug-Class-Meta@rt.cpan.org|mailto:bug-Class-Meta@rt.cpan.org>.
 
 =head1 AUTHOR
 
